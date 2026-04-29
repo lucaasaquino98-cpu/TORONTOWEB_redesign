@@ -5306,8 +5306,60 @@
             showToast('Outras opções do caixa');
         }
 
-        // Keyboard shortcuts for PDV
+        // ==================== LISTENER UNIFICADO: ESC + Atalhos PDV ====================
         document.addEventListener('keydown', function(e) {
+
+            // Verifica se o elemento está realmente visível:
+            // - não tem display:none / visibility:hidden em si
+            // - se estiver dentro de um .ge-modal-overlay, esse overlay precisa ter classe .open
+            function isVisible(el) {
+                if (!el) return false;
+                if (getComputedStyle(el).display === 'none') return false;
+                if (getComputedStyle(el).visibility === 'hidden') return false;
+                // Se estiver dentro de um overlay modal, o overlay precisa estar aberto
+                const overlay = el.closest('.ge-modal-overlay');
+                if (overlay && !overlay.classList.contains('open')) return false;
+                return true;
+            }
+
+            // ---------- ESC: lógica de saída em camadas ----------
+            if (e.key === 'Escape') {
+
+                // Camada 1 — modais/overlays realmente abertos
+                const sairSelectors = [
+                    '.ge-modal-overlay.open .ge-modal-close',        // X dos modais ge (só quando open)
+                    '.ge-modal-overlay.open .pgto-cancelar-btn',     // Cancelar pagamento
+                    '.ge-modal-overlay.open .cfg-cancel-btn',        // Cancelar config geral
+                    '.ge-modal-overlay.open .pvloc-btn.pvloc-btn-cancela', // Cancelar pré-venda localizar
+                    '.ge-modal-overlay.open .pv-tb-btn.pv-tb-sair',  // Sair toolbar pré-venda lista
+                    '.ge-modal-overlay.open .pv-titlebar-close',     // X titlebar pré-venda lista
+                    '#modalNovoProduto.open .mnp-close',              // X modal novo produto
+                    '#modalNovoProduto.open .mnp-btn-cancela',        // Cancela modal novo produto
+                ];
+                for (const sel of sairSelectors) {
+                    const btn = document.querySelector(sel);
+                    if (isVisible(btn)) { e.preventDefault(); btn.click(); return; }
+                }
+
+                // Camada 2 — Cadastro de Produtos aberto
+                const cadpOverlay = document.getElementById('cadpOverlay');
+                if (cadpOverlay && cadpOverlay.style.display === 'flex') {
+                    e.preventDefault();
+                    exitCadastroProdutos();
+                    return;
+                }
+
+                // Camada 3 — Caixa / PDV aberto (sem modal interno)
+                if (document.body.classList.contains('pdv-mode')) {
+                    e.preventDefault();
+                    exitPdvMode();
+                    return;
+                }
+
+                return; // nada a fazer com ESC fora dessas telas
+            }
+
+            // ---------- Atalhos de teclado do PDV (somente quando caixa ativo) ----------
             const caixaSection = document.getElementById('caixa-section');
             if (!caixaSection.classList.contains('active')) return;
 
@@ -5319,29 +5371,21 @@
                 if (e.key === 'F3')  { e.preventDefault(); selectPgtoMethod('Cartão de Crédito','credito'); }
                 if (e.key === 'F4')  { e.preventDefault(); selectPgtoMethod('PIX','pix'); }
                 if (e.key === 'F11') { e.preventDefault(); confirmarPagamento(); }
-                if (e.key === 'Escape') { e.preventDefault(); closePagamento(); }
                 return;
             }
 
             if (e.key === 'F2') {
-                e.preventDefault();
-                finalizeSale();
+                e.preventDefault(); finalizeSale();
             } else if (e.key === 'F3') {
-                e.preventDefault();
-                cancelItem();
+                e.preventDefault(); cancelItem();
             } else if (e.key === 'F5') {
-                e.preventDefault();
-                applyDiscount();
+                e.preventDefault(); applyDiscount();
             } else if (e.key === 'F8') {
-                e.preventDefault();
-                preSale();
+                e.preventDefault(); preSale();
             } else if (e.key === 'Enter' && document.activeElement.id === 'pdvSearchInput') {
-                e.preventDefault();
-                searchProduct();
+                e.preventDefault(); searchProduct();
             } else if (e.key === 'm' && e.ctrlKey) {
-                e.preventDefault();
-                toggleEmissionType();
-                showToast('Tipo de emissão alterado');
+                e.preventDefault(); toggleEmissionType(); showToast('Tipo de emissão alterado');
             }
         });
 
