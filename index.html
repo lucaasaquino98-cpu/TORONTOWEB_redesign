@@ -3107,23 +3107,19 @@
         .cfg-cancel-btn:hover { border-color: #ef4444; color: #ef4444; }
 
         /* ── ESTOQUE SECTION ──────────────────────────────────────── */
+        /* ══ ESTOQUE — layout ══ */
         .estoque-layout {
             display: grid;
-            grid-template-columns: 260px 1fr;
+            grid-template-columns: 1fr;
             gap: 1.25rem;
-            align-items: start;
         }
-        .estoque-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+        /* Botão principal */
         .estoque-main-btn {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%);
             color: white;
             border: none;
             border-radius: var(--radius);
-            padding: 1.125rem 1.25rem;
+            padding: 1.125rem 1.5rem;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             font-weight: 700;
@@ -3138,50 +3134,59 @@
         }
         .estoque-main-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.3); }
         .estoque-main-btn i { font-size: 1.25rem; }
+        /* Grid colorido de botões */
+        .estoque-sidebar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
         .estoque-nav-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.875rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            padding: 1.1rem 0.75rem 1rem;
             font-family: 'Inter', sans-serif;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.15s;
-            width: 100%;
+            justify-content: center;
+            gap: 0.6rem;
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        .estoque-nav-btn i {
-            font-size: 1.5rem;
-            color: var(--primary);
-            opacity: 0.85;
+        .estoque-nav-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.08);
+            opacity: 0;
+            transition: opacity 0.15s;
         }
-        .estoque-nav-btn span {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-        }
-        .estoque-nav-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(14,165,233,0.05);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .estoque-nav-btn:hover i { opacity: 1; }
-        .estoque-nav-btn:hover span { color: var(--primary); }
+        .estoque-nav-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); filter: brightness(1.08); }
+        .estoque-nav-btn:hover::after { opacity: 1; }
+        .estoque-nav-btn i { font-size: 1.6rem; opacity: 0.92; }
+        .estoque-nav-btn span { font-size: 0.78rem; line-height: 1.3; color: inherit; opacity: 0.93; }
+        /* Cores individuais */
+        .enb-cyan    { background: linear-gradient(135deg,#0ea5e9,#0369a1); color:#fff; }
+        .enb-violet  { background: linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; }
+        .enb-emerald { background: linear-gradient(135deg,#10b981,#047857); color:#fff; }
+        .enb-amber   { background: linear-gradient(135deg,#f59e0b,#b45309); color:#fff; }
+        .enb-rose    { background: linear-gradient(135deg,#f43f5e,#be123c); color:#fff; }
+        .enb-indigo  { background: linear-gradient(135deg,#6366f1,#4338ca); color:#fff; }
+        .enb-teal    { background: linear-gradient(135deg,#14b8a6,#0f766e); color:#fff; }
+        .enb-orange  { background: linear-gradient(135deg,#fb923c,#c2410c); color:#fff; }
+        /* Stats */
         .estoque-stats {
             display: flex;
             flex-direction: column;
             gap: 0.875rem;
         }
-        @media (max-width: 768px) {
-            .estoque-layout { grid-template-columns: 1fr; }
-            .estoque-sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+        @media (max-width: 600px) {
+            .estoque-sidebar { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -4570,37 +4575,37 @@
 
             <div id="estoque-section" class="section-content">
                 <div class="page-header">
-                    <h2>Estoque</h2>
+                    <h2 style="display:flex;align-items:center;gap:0.6rem;"><i class="fas fa-boxes" style="color:var(--primary);font-size:1.1rem;"></i> Estoque</h2>
+                    <p>Controle e movimentação de mercadorias</p>
                 </div>
                 <div class="estoque-layout">
-                    <!-- SIDEBAR com botões -->
+                    <button class="estoque-main-btn" onclick="showToast('Acessar Controle de Estoque')">
+                        <i class="fas fa-boxes"></i>
+                        Acessar Controle de Estoque
+                        <i class="fas fa-chevron-right" style="margin-left:auto;opacity:0.5;font-size:0.9rem;"></i>
+                    </button>
                     <div class="estoque-sidebar">
-                        <button class="estoque-main-btn" onclick="showToast('Acessar Controle de Estoque')">
-                            <i class="fas fa-boxes"></i>
-                            Acessar Controle de Estoque
-                        </button>
-                        <button class="estoque-nav-btn" onclick="showToast('Preços de Partida')">
+                        <button class="estoque-nav-btn enb-cyan" onclick="showToast('Preços de Partida')">
                             <i class="fas fa-dollar-sign"></i>
                             <span>Preços de Partida</span>
                         </button>
-                        <button class="estoque-nav-btn" onclick="showToast('Tabelas de Preço')">
+                        <button class="estoque-nav-btn enb-violet" onclick="showToast('Tabelas de Preço')">
                             <i class="fas fa-table"></i>
                             <span>Tabelas de Preço</span>
                         </button>
-                        <button class="estoque-nav-btn" onclick="showToast('Transferência Interna')">
+                        <button class="estoque-nav-btn enb-emerald" onclick="showToast('Transferência Interna')">
                             <i class="fas fa-exchange-alt"></i>
                             <span>Transferência Interna</span>
                         </button>
-                        <button class="estoque-nav-btn" onclick="showToast('Balanço')">
+                        <button class="estoque-nav-btn enb-amber" onclick="showToast('Balanço')">
                             <i class="fas fa-balance-scale"></i>
                             <span>Balanço</span>
                         </button>
-                        <button class="estoque-nav-btn" onclick="showToast('MicroPCP')">
+                        <button class="estoque-nav-btn enb-rose" onclick="showToast('MicroPCP')">
                             <i class="fas fa-list-ul"></i>
                             <span>MicroPCP</span>
                         </button>
                     </div>
-                    <!-- Cards de resumo -->
                     <div class="estoque-stats">
                         <div class="stats-grid" style="margin:0">
                             <div class="stat-card">
@@ -4626,52 +4631,244 @@
 
 
             <div id="financeiro-section" class="section-content">
-                <div class="page-header">
-                    <h2>Financeiro</h2>
-                </div>
-
-                <!-- Botão principal -->
-                <div class="cad-group" style="margin-bottom:1.25rem">
-                    <div class="cad-group-buttons" style="border-left:none;padding:0.875rem 1rem;">
-                        <button class="estoque-main-btn" style="width:auto;white-space:nowrap" onclick="showToast('Movimentação nas Contas Correntes e Caixas')">
-                            <i class="fas fa-cash-register"></i>
-                            Movimentação nas Contas Correntes e Caixas
-                        </button>
+                <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.6rem;"><i class="fas fa-landmark" style="color:var(--primary);font-size:1.1rem;"></i> Financeiro</h2>
+                        <p>Gestão de contas, caixas e controles financeiros</p>
                     </div>
                 </div>
 
-                <!-- Contas -->
-                <div class="cad-section-label"><i class="fas fa-file-invoice-dollar"></i> Contas</div>
-                <div class="cad-group" style="margin-bottom:1.25rem">
-                    <div class="cad-group-buttons" style="border-left:none;padding:0.875rem 1rem;">
-                        <button class="cad-btn cad-btn-accent" onclick="showToast('Contas a Pagar')"><i class="fas fa-arrow-circle-up"></i> Contas a Pagar</button>
-                        <button class="cad-btn cad-btn-accent" onclick="showToast('Contas a Receber')"><i class="fas fa-arrow-circle-down"></i> Contas a Receber</button>
-                        <button class="cad-btn" onclick="showToast('Emissão de Boletos')"><i class="fas fa-barcode"></i> Emissão de Boletos</button>
-                    </div>
+                <!-- Botão principal destaque -->
+                <button class="fin-main-action" onclick="showToast('Movimentação nas Contas Correntes e Caixas')">
+                    <span class="fin-main-icon"><i class="fas fa-cash-register"></i></span>
+                    <span class="fin-main-text">
+                        <strong>Movimentação nas Contas Correntes e Caixas</strong>
+                        <small>Registrar entradas, saídas e transferências entre contas</small>
+                    </span>
+                    <i class="fas fa-chevron-right fin-main-arrow"></i>
+                </button>
+
+                <!-- CONTAS -->
+                <div class="cad-section-label" style="margin-top:1.5rem"><i class="fas fa-file-invoice-dollar"></i> Contas</div>
+                <div class="fin-cards-row">
+
+                    <!-- Contas a Pagar -->
+                    <button class="fin-card fin-card-pagar" onclick="showToast('Contas a Pagar')">
+                        <div class="fin-card-icon"><i class="fas fa-arrow-up"></i></div>
+                        <div class="fin-card-body">
+                            <span class="fin-card-title">Contas a Pagar</span>
+                            <span class="fin-card-sub">Vencimentos e pagamentos</span>
+                        </div>
+                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    </button>
+
+                    <!-- Contas a Receber -->
+                    <button class="fin-card fin-card-receber" onclick="showToast('Contas a Receber')">
+                        <div class="fin-card-icon"><i class="fas fa-arrow-down"></i></div>
+                        <div class="fin-card-body">
+                            <span class="fin-card-title">Contas a Receber</span>
+                            <span class="fin-card-sub">Cobranças e recebimentos</span>
+                        </div>
+                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    </button>
+
+                    <!-- Emissão de Boletos -->
+                    <button class="fin-card fin-card-boleto" onclick="showToast('Emissão de Boletos')">
+                        <div class="fin-card-icon"><i class="fas fa-barcode"></i></div>
+                        <div class="fin-card-body">
+                            <span class="fin-card-title">Emissão de Boletos</span>
+                            <span class="fin-card-sub">Gerar e gerenciar boletos</span>
+                        </div>
+                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    </button>
                 </div>
 
-                <!-- Outros controles -->
-                <div class="cad-section-label"><i class="fas fa-sliders-h"></i> Outros controles</div>
-                <div class="cad-group" style="margin-bottom:1.25rem">
-                    <div class="cad-group-buttons" style="border-left:none;padding:0.875rem 1rem;">
-                        <button class="cad-btn" onclick="showToast('GCP - Controle de Comissionamento')"><i class="fas fa-percentage"></i> GCP - Controle de Comissionamento</button>
-                        <button class="cad-btn" onclick="showToast('Consulta baixas')"><i class="fas fa-search-dollar"></i> Consulta baixas</button>
-                        <button class="cad-btn" onclick="showToast('Controle Cheques Clientes')"><i class="fas fa-money-check"></i> Controle Cheques Clientes</button>
-                    </div>
+                <!-- OUTROS CONTROLES -->
+                <div class="cad-section-label" style="margin-top:1.5rem"><i class="fas fa-sliders-h"></i> Outros Controles</div>
+                <div class="fin-btn-group">
+                    <button class="fin-pill-btn" onclick="showToast('GCP - Controle de Comissionamento')">
+                        <i class="fas fa-percentage"></i> GCP - Controle de Comissionamento
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Consulta baixas')">
+                        <i class="fas fa-search-dollar"></i> Consulta baixas
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Controle Cheques Clientes')">
+                        <i class="fas fa-money-check"></i> Controle Cheques Clientes
+                    </button>
                 </div>
 
-                <!-- Cadastros - Tabelas de Base do Financeiro -->
-                <div class="cad-section-label"><i class="fas fa-database"></i> Cadastros - Tabelas de Base do Financeiro</div>
-                <div class="cad-group">
-                    <div class="cad-group-buttons" style="border-left:none;padding:0.875rem 1rem;">
-                        <button class="cad-btn cad-btn-accent" onclick="showToast('Contas Correntes (CaixaBanco)')"><i class="fas fa-university"></i> Contas Correntes (CaixaBanco)</button>
-                        <button class="cad-btn" onclick="showToast('Cobrança')"><i class="fas fa-hand-holding-usd"></i> Cobrança</button>
-                        <button class="cad-btn" onclick="showToast('Cobrador')"><i class="fas fa-user-tie"></i> Cobrador</button>
-                        <button class="cad-btn cad-btn-accent" onclick="showToast('Contas Gerenciais')"><i class="fas fa-chart-pie"></i> Contas Gerenciais</button>
-                        <button class="cad-btn" onclick="showToast('Contas Contábeis')"><i class="fas fa-book"></i> Contas Contábeis</button>
-                        <button class="cad-btn" onclick="showToast('Tipos de Documento')"><i class="fas fa-file-alt"></i> Tipos de Documento</button>
-                    </div>
+                <!-- CADASTROS -->
+                <div class="cad-section-label" style="margin-top:1.5rem"><i class="fas fa-database"></i> Cadastros — Tabelas de Base do Financeiro</div>
+                <div class="fin-btn-group">
+                    <button class="fin-pill-btn fin-pill-highlight" onclick="showToast('Contas Correntes (CaixaBanco)')">
+                        <i class="fas fa-university"></i> Contas Correntes (CaixaBanco)
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Cobrança')">
+                        <i class="fas fa-hand-holding-usd"></i> Cobrança
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Cobrador')">
+                        <i class="fas fa-user-tie"></i> Cobrador
+                    </button>
+                    <button class="fin-pill-btn fin-pill-highlight" onclick="showToast('Contas Gerenciais')">
+                        <i class="fas fa-chart-pie"></i> Contas Gerenciais
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Contas Contábeis')">
+                        <i class="fas fa-book"></i> Contas Contábeis
+                    </button>
+                    <button class="fin-pill-btn" onclick="showToast('Tipos de Documento')">
+                        <i class="fas fa-file-alt"></i> Tipos de Documento
+                    </button>
                 </div>
+
+                <style>
+                /* ── Botão principal ── */
+                .fin-main-action {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    width: 100%;
+                    background: linear-gradient(135deg, var(--primary-dark) 0%, #0369a1 100%);
+                    color: white;
+                    border: none;
+                    border-radius: var(--radius);
+                    padding: 1rem 1.25rem;
+                    cursor: pointer;
+                    font-family: 'Inter', sans-serif;
+                    transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
+                    box-shadow: 0 4px 14px rgba(14,165,233,0.28);
+                    text-align: left;
+                    margin-top: 0.5rem;
+                }
+                .fin-main-action:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 7px 22px rgba(14,165,233,0.35); }
+                .fin-main-icon {
+                    width: 46px; height: 46px;
+                    background: rgba(255,255,255,0.15);
+                    border-radius: 10px;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.3rem;
+                    flex-shrink: 0;
+                }
+                .fin-main-text { flex: 1; }
+                .fin-main-text strong { display: block; font-size: 0.95rem; font-weight: 700; }
+                .fin-main-text small { font-size: 0.75rem; opacity: 0.75; font-weight: 400; }
+                .fin-main-arrow { opacity: 0.5; font-size: 0.85rem; }
+
+                /* ── Cards de contas ── */
+                .fin-cards-row {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                    gap: 0.875rem;
+                }
+                .fin-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.875rem;
+                    padding: 1rem 1.1rem;
+                    border-radius: var(--radius);
+                    border: 1.5px solid transparent;
+                    cursor: pointer;
+                    font-family: 'Inter', sans-serif;
+                    text-align: left;
+                    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .fin-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; right: 0;
+                    height: 3px;
+                    border-radius: var(--radius) var(--radius) 0 0;
+                }
+                .fin-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); filter: brightness(1.03); }
+                .fin-card-icon {
+                    width: 42px; height: 42px;
+                    border-radius: 10px;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.1rem;
+                    flex-shrink: 0;
+                }
+                .fin-card-body { flex: 1; }
+                .fin-card-title { display: block; font-size: 0.875rem; font-weight: 700; }
+                .fin-card-sub { display: block; font-size: 0.72rem; margin-top: 2px; opacity: 0.7; font-weight: 400; }
+                .fin-card-arrow { font-size: 0.75rem; opacity: 0.4; }
+
+                /* Pagar – vermelho */
+                .fin-card-pagar {
+                    background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(220,38,38,0.04) 100%);
+                    border-color: rgba(239,68,68,0.3);
+                    color: var(--text-primary);
+                }
+                .fin-card-pagar::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+                .fin-card-pagar .fin-card-icon { background: rgba(239,68,68,0.12); color: #ef4444; }
+                .fin-card-pagar .fin-card-title { color: #dc2626; }
+                [data-theme="dark"] .fin-card-pagar .fin-card-title { color: #f87171; }
+
+                /* Receber – verde */
+                .fin-card-receber {
+                    background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.04) 100%);
+                    border-color: rgba(16,185,129,0.3);
+                    color: var(--text-primary);
+                }
+                .fin-card-receber::before { background: linear-gradient(90deg, #10b981, #059669); }
+                .fin-card-receber .fin-card-icon { background: rgba(16,185,129,0.12); color: #10b981; }
+                .fin-card-receber .fin-card-title { color: #059669; }
+                [data-theme="dark"] .fin-card-receber .fin-card-title { color: #34d399; }
+
+                /* Boleto – amarelo/âmbar */
+                .fin-card-boleto {
+                    background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(217,119,6,0.04) 100%);
+                    border-color: rgba(245,158,11,0.3);
+                    color: var(--text-primary);
+                }
+                .fin-card-boleto::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+                .fin-card-boleto .fin-card-icon { background: rgba(245,158,11,0.12); color: #f59e0b; }
+                .fin-card-boleto .fin-card-title { color: #b45309; }
+                [data-theme="dark"] .fin-card-boleto .fin-card-title { color: #fbbf24; }
+
+                /* ── Grupo de botões pill ── */
+                .fin-btn-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    background: var(--card-bg);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    padding: 0.875rem 1rem;
+                    box-shadow: var(--shadow-sm);
+                }
+                .fin-pill-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    padding: 0.45rem 0.95rem;
+                    background: var(--bg-primary);
+                    border: 1.5px solid var(--border);
+                    border-radius: 20px;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    cursor: pointer;
+                    transition: all 0.15s;
+                    white-space: nowrap;
+                }
+                .fin-pill-btn i { font-size: 0.75rem; color: var(--primary); }
+                .fin-pill-btn:hover {
+                    border-color: var(--primary);
+                    color: var(--primary);
+                    background: rgba(14,165,233,0.07);
+                    transform: translateY(-1px);
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+                }
+                .fin-pill-highlight {
+                    background: rgba(14,165,233,0.07);
+                    border-color: rgba(14,165,233,0.4);
+                    color: var(--primary);
+                }
+                .fin-pill-highlight i { color: var(--primary); }
+                .fin-pill-highlight:hover { background: rgba(14,165,233,0.14); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+                </style>
             </div>
 
 
