@@ -473,20 +473,7 @@
             min-height: calc(100vh - var(--header-height));
         }
 
-        .page-header { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
 
-        .page-header h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-top: 0.2rem;
-        }
 
         /* Stats Grid */
         .stats-grid {
@@ -3338,9 +3325,7 @@
             
             <!-- DASHBOARD SECTION -->
             <div id="dashboard-section" class="section-content active">
-                <div class="page-header animate-in">
-                    <h2>Dashboard</h2>
-                </div>
+
 
                 <div class="stats-grid">
                     <div class="stat-card animate-in delay-1">
@@ -3767,9 +3752,7 @@
 
             <!-- MOVIMENTAÇÕES - DOCUMENTOS FISCAIS SECTION -->
             <div id="movimentacoes-section" class="section-content">
-                <div class="page-header animate-in">
-                    <h2>Documentos Fiscais</h2>
-                </div>
+
 
                 <div class="fiscal-filters animate-in delay-1">
                     <div class="filters-grid">
@@ -4054,18 +4037,7 @@
             <!-- ==================== CADASTROS SECTION ==================== -->
             <div id="cadastros-section" class="section-content">
 
-                <!-- Page Header moderno -->
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:2px solid var(--border);">
-                    <div>
-                        <h2 style="font-size:1.35rem;font-weight:800;color:var(--text-primary);margin-bottom:0.15rem;">Cadastros</h2>
-                        <p style="color:var(--text-secondary);font-size:0.82rem;">Gerencie produtos, clientes, tributações e configurações do sistema</p>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:0.75rem;">
-                        <div style="background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.25);border-radius:8px;padding:0.4rem 0.9rem;font-size:0.78rem;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:0.4rem;">
-                            <i class="fas fa-circle" style="font-size:0.45rem;color:#10b981;"></i> Sistema Ativo
-                        </div>
-                    </div>
-                </div>
+
                 <!-- ALERTA FUTURO -->
                 <div style="background:rgba(14,165,233,0.06);border:1px dashed rgba(14,165,233,0.3);border-radius:10px;padding:0.6rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.6rem;font-size:0.78rem;color:var(--text-secondary);">
                     <i class="fas fa-info-circle" style="color:var(--primary);font-size:0.85rem;flex-shrink:0;"></i>
@@ -4574,10 +4546,7 @@
             <!-- ==================== FIM CADASTROS SECTION ==================== -->
 
             <div id="estoque-section" class="section-content">
-                <div class="page-header">
-                    <h2 style="display:flex;align-items:center;gap:0.6rem;"><i class="fas fa-boxes" style="color:var(--primary);font-size:1.1rem;"></i> Estoque</h2>
-                    <p>Controle e movimentação de mercadorias</p>
-                </div>
+
                 <div class="estoque-layout">
                     <button class="estoque-main-btn" onclick="showToast('Acessar Controle de Estoque')">
                         <i class="fas fa-boxes"></i>
@@ -4631,12 +4600,7 @@
 
 
             <div id="financeiro-section" class="section-content">
-                <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <h2 style="display:flex;align-items:center;gap:0.6rem;"><i class="fas fa-landmark" style="color:var(--primary);font-size:1.1rem;"></i> Financeiro</h2>
-                        <p>Gestão de contas, caixas e controles financeiros</p>
-                    </div>
-                </div>
+
 
                 <!-- Botão principal destaque -->
                 <button class="fin-main-action" onclick="showToast('Movimentação nas Contas Correntes e Caixas')">
@@ -4873,9 +4837,7 @@
 
 
             <div id="relatorios-section" class="section-content">
-                <div class="page-header">
-                    <h2>Relatórios</h2>
-                </div>
+
 
                 <!-- SAÍDAS / VENDAS -->
                 <div class="cad-section-label"><i class="fas fa-chart-line"></i> Saídas / Vendas</div>
@@ -4955,9 +4917,7 @@
 
 
             <div id="configuracoes-section" class="section-content">
-                <div class="page-header">
-                    <h2>Outras Opções</h2>
-                </div>
+
                 <div style="display:flex;flex-direction:column;gap:0.5rem;max-width:320px;">
                     <button class="cad-btn" onclick="showToast('Geração de Arquivos do SPED')" style="justify-content:flex-start;padding:0.75rem 1.25rem;font-size:0.9rem;"><i class="fas fa-file-alt"></i> Geração de Arquivos do SPED</button>
                     <button class="cad-btn" onclick="showToast('Envios dos XMLs à contabilidade')" style="justify-content:flex-start;padding:0.75rem 1.25rem;font-size:0.9rem;"><i class="fas fa-paper-plane"></i> Envios dos XMLs à contabilidade</button>
