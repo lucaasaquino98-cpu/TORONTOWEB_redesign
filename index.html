@@ -6,6 +6,7 @@
     <title>GestãoEnter - Sistema de Gestão Empresarial</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
             --primary: #0ea5e9;
@@ -3166,6 +3167,14 @@
         .enb-indigo  { background: linear-gradient(135deg,#a3e635,#65a30d); color:#fff; }   /* lime-300 → lime-600  */
         .enb-teal    { background: linear-gradient(135deg,#e879f9,#c026d3); color:#fff; }   /* fuchsia-400 → fuchsia-600 */
         .enb-orange  { background: linear-gradient(135deg,#2dd4bf,#0f766e); color:#fff; }   /* teal-400 → teal-700  */
+        /* Outros Controles — degradê partindo do laranja */
+        .enb-oc-1 { background: linear-gradient(135deg, #ff6b35 0%, #ff3d77 100%); color:#fff; box-shadow: 0 3px 12px rgba(255,61,119,0.35); }
+        .enb-oc-2 { background: linear-gradient(135deg, #ff6b35 0%, #9b3dff 100%); color:#fff; box-shadow: 0 3px 12px rgba(155,61,255,0.35); }
+        .enb-oc-3 { background: linear-gradient(135deg, #ff6b35 0%, #0ea5e9 100%); color:#fff; box-shadow: 0 3px 12px rgba(14,165,233,0.35); }
+        /* Financeiro — vermelho, verde, amarelo */
+        .enb-fin-pagar   { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:#fff; box-shadow: 0 3px 12px rgba(239,68,68,0.35); }
+        .enb-fin-receber { background: linear-gradient(135deg, #10b981 0%, #047857 100%); color:#fff; box-shadow: 0 3px 12px rgba(16,185,129,0.35); }
+        .enb-fin-boleto  { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); color:#fff; box-shadow: 0 3px 12px rgba(245,158,11,0.35); }
         /* Stats */
         .estoque-stats {
             display: flex;
@@ -3312,7 +3321,7 @@
                         <i class="fas fa-network-wired"></i>
                         <span>Canais de Venda</span>
                     </a>
-                    <a href="#" class="quick-link">
+                    <a href="#" class="quick-link" onclick="event.preventDefault();openGestaoModal('pedidos')">
                         <i class="fas fa-clipboard-list"></i>
                         <span>Pedidos</span>
                     </a>
@@ -3448,7 +3457,7 @@
                             </div>
                         </div>
 
-                        <div class="module-card animate-in delay-3">
+                        <div class="module-card animate-in delay-3" onclick="openGestaoModal('os')">
                             <div class="module-header">
                                 <div>
                                     <div class="module-icon purple">
@@ -4617,47 +4626,389 @@
                 <div class="fin-cards-row">
 
                     <!-- Contas a Pagar -->
-                    <button class="fin-card fin-card-pagar" onclick="showToast('Contas a Pagar')">
-                        <div class="fin-card-icon"><i class="fas fa-arrow-up"></i></div>
-                        <div class="fin-card-body">
-                            <span class="fin-card-title">Contas a Pagar</span>
-                            <span class="fin-card-sub">Vencimentos e pagamentos</span>
-                        </div>
-                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    <button class="estoque-nav-btn enb-fin-pagar" onclick="openFinPanel('pagar')">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Contas a Pagar</span>
                     </button>
 
                     <!-- Contas a Receber -->
-                    <button class="fin-card fin-card-receber" onclick="showToast('Contas a Receber')">
-                        <div class="fin-card-icon"><i class="fas fa-arrow-down"></i></div>
-                        <div class="fin-card-body">
-                            <span class="fin-card-title">Contas a Receber</span>
-                            <span class="fin-card-sub">Cobranças e recebimentos</span>
-                        </div>
-                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    <button class="estoque-nav-btn enb-fin-receber" onclick="openFinPanel('receber')">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>Contas a Receber</span>
                     </button>
 
                     <!-- Emissão de Boletos -->
-                    <button class="fin-card fin-card-boleto" onclick="showToast('Emissão de Boletos')">
-                        <div class="fin-card-icon"><i class="fas fa-barcode"></i></div>
-                        <div class="fin-card-body">
-                            <span class="fin-card-title">Emissão de Boletos</span>
-                            <span class="fin-card-sub">Gerar e gerenciar boletos</span>
-                        </div>
-                        <i class="fas fa-chevron-right fin-card-arrow"></i>
+                    <button class="estoque-nav-btn enb-fin-boleto" onclick="showToast('Emissão de Boletos')">
+                        <i class="fas fa-barcode"></i>
+                        <span>Emissão de Boletos</span>
                     </button>
                 </div>
 
+                <!-- ── PAINEL CONTAS A PAGAR ── -->
+                <div id="fin-panel-pagar" class="fin-panel" style="display:none">
+                    <div class="fin-panel-header fin-panel-header-pagar">
+                        <div class="fin-panel-title"><i class="fas fa-arrow-up"></i> Contas a Pagar</div>
+                        <div class="fin-panel-meta">Dados simulados — integração via <code>GET /api/contas-pagar/resumo</code></div>
+                        <button class="fin-panel-close" onclick="closeFinPanel('pagar')"><i class="fas fa-times"></i></button>
+                    </div>
+                    <!-- KPIs -->
+                    <div class="fin-panel-kpis">
+                        <div class="fin-kpi fin-kpi-red">
+                            <span class="fin-kpi-label">Total em Aberto</span>
+                            <span class="fin-kpi-value">R$ 84.320</span>
+                            <span class="fin-kpi-sub">12 títulos</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-orange">
+                            <span class="fin-kpi-label">Vence Hoje</span>
+                            <span class="fin-kpi-value">R$ 9.450</span>
+                            <span class="fin-kpi-sub">3 títulos</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-darkred">
+                            <span class="fin-kpi-label">Vencidos</span>
+                            <span class="fin-kpi-value">R$ 14.200</span>
+                            <span class="fin-kpi-sub">4 títulos</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-gray">
+                            <span class="fin-kpi-label">Pago este Mês</span>
+                            <span class="fin-kpi-value">R$ 52.100</span>
+                            <span class="fin-kpi-sub">18 títulos</span>
+                        </div>
+                    </div>
+                    <!-- Gráficos -->
+                    <div class="fin-panel-charts">
+                        <div class="fin-chart-box">
+                            <div class="fin-chart-title">Vencimentos por Semana (próximos 30 dias)</div>
+                            <div class="fin-chart-wrap"><canvas id="chart-pagar-semanas"></canvas></div>
+                        </div>
+                        <div class="fin-chart-box">
+                            <div class="fin-chart-title">Top Fornecedores em Aberto</div>
+                            <div class="fin-chart-wrap"><canvas id="chart-pagar-fornecedores"></canvas></div>
+                        </div>
+                        <div class="fin-chart-box fin-chart-box-wide">
+                            <div class="fin-chart-title">Fluxo de Pagamentos — Últimos 6 Meses</div>
+                            <div class="fin-chart-wrap-wide"><canvas id="chart-pagar-fluxo"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── PAINEL CONTAS A RECEBER ── -->
+                <div id="fin-panel-receber" class="fin-panel" style="display:none">
+                    <div class="fin-panel-header fin-panel-header-receber">
+                        <div class="fin-panel-title"><i class="fas fa-arrow-down"></i> Contas a Receber</div>
+                        <div class="fin-panel-meta">Dados simulados — integração via <code>GET /api/contas-receber/resumo</code></div>
+                        <button class="fin-panel-close" onclick="closeFinPanel('receber')"><i class="fas fa-times"></i></button>
+                    </div>
+                    <!-- KPIs -->
+                    <div class="fin-panel-kpis">
+                        <div class="fin-kpi fin-kpi-green">
+                            <span class="fin-kpi-label">Total a Receber</span>
+                            <span class="fin-kpi-value">R$ 138.750</span>
+                            <span class="fin-kpi-sub">27 títulos</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-teal">
+                            <span class="fin-kpi-label">Recebido este Mês</span>
+                            <span class="fin-kpi-value">R$ 67.400</span>
+                            <span class="fin-kpi-sub">19 títulos</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-darkred">
+                            <span class="fin-kpi-label">Inadimplente</span>
+                            <span class="fin-kpi-value">R$ 22.300</span>
+                            <span class="fin-kpi-sub">6 clientes</span>
+                        </div>
+                        <div class="fin-kpi fin-kpi-blue">
+                            <span class="fin-kpi-label">Previsto p/ Hoje</span>
+                            <span class="fin-kpi-value">R$ 11.200</span>
+                            <span class="fin-kpi-sub">4 títulos</span>
+                        </div>
+                    </div>
+                    <!-- Gráficos -->
+                    <div class="fin-panel-charts">
+                        <div class="fin-chart-box">
+                            <div class="fin-chart-title">Previsto vs Realizado (últimos 6 meses)</div>
+                            <div class="fin-chart-wrap"><canvas id="chart-receber-prevreal"></canvas></div>
+                        </div>
+                        <div class="fin-chart-box">
+                            <div class="fin-chart-title">Status da Carteira</div>
+                            <div class="fin-chart-wrap"><canvas id="chart-receber-status"></canvas></div>
+                        </div>
+                        <div class="fin-chart-box fin-chart-box-wide">
+                            <div class="fin-chart-title">Curva de Inadimplência — Últimos 6 Meses</div>
+                            <div class="fin-chart-wrap-wide"><canvas id="chart-receber-inadim"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                /* ── Painel de gráficos ── */
+                .fin-panel {
+                    margin-top: 1.25rem;
+                    background: var(--card-bg);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    box-shadow: var(--shadow-lg);
+                    animation: finPanelIn 0.25s cubic-bezier(0.4,0,0.2,1);
+                }
+                @keyframes finPanelIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                .fin-panel-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 0.875rem 1.25rem;
+                    border-bottom: 1px solid var(--border);
+                }
+                .fin-panel-header-pagar   { background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(220,38,38,0.06)); border-left: 4px solid #ef4444; }
+                .fin-panel-header-receber { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.06)); border-left: 4px solid #10b981; }
+                .fin-panel-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+                .fin-panel-header-pagar .fin-panel-title i   { color: #ef4444; }
+                .fin-panel-header-receber .fin-panel-title i { color: #10b981; }
+                .fin-panel-meta { font-size: 0.72rem; color: var(--text-muted); margin-left: auto; }
+                .fin-panel-meta code { background: var(--bg-tertiary); padding: 1px 5px; border-radius: 4px; font-size: 0.7rem; color: var(--primary); }
+                .fin-panel-close {
+                    background: var(--bg-tertiary); border: 1px solid var(--border);
+                    border-radius: 6px; width: 28px; height: 28px;
+                    display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; color: var(--text-secondary); font-size: 0.8rem;
+                    transition: all 0.15s; flex-shrink: 0;
+                }
+                .fin-panel-close:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+                /* KPIs */
+                .fin-panel-kpis {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                    gap: 0;
+                    border-bottom: 1px solid var(--border);
+                }
+                .fin-kpi {
+                    padding: 1rem 1.25rem;
+                    border-right: 1px solid var(--border);
+                    display: flex; flex-direction: column; gap: 0.2rem;
+                }
+                .fin-kpi:last-child { border-right: none; }
+                .fin-kpi-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.65; color: var(--text-secondary); }
+                .fin-kpi-value { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+                .fin-kpi-sub   { font-size: 0.7rem; color: var(--text-muted); }
+                .fin-kpi-red     .fin-kpi-value { color: #ef4444; }
+                .fin-kpi-orange  .fin-kpi-value { color: #f97316; }
+                .fin-kpi-darkred .fin-kpi-value { color: #dc2626; }
+                .fin-kpi-gray    .fin-kpi-value { color: var(--text-secondary); }
+                .fin-kpi-green   .fin-kpi-value { color: #10b981; }
+                .fin-kpi-teal    .fin-kpi-value { color: #0d9488; }
+                .fin-kpi-blue    .fin-kpi-value { color: #3b82f6; }
+                /* Gráficos */
+                .fin-panel-charts {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0;
+                }
+                .fin-chart-box {
+                    padding: 1.25rem;
+                    border-right: 1px solid var(--border);
+                    border-bottom: 1px solid var(--border);
+                }
+                .fin-chart-box:nth-child(2) { border-right: none; }
+                .fin-chart-box-wide {
+                    grid-column: 1 / -1;
+                    border-right: none;
+                    border-bottom: none;
+                }
+                .fin-chart-title { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.875rem; text-transform: uppercase; letter-spacing: 0.04em; }
+                .fin-chart-box { position: relative; }
+                .fin-chart-wrap { position: relative; height: 180px; width: 100%; }
+                .fin-chart-wrap-wide { position: relative; height: 150px; width: 100%; }
+                @media (max-width: 640px) {
+                    .fin-panel-charts { grid-template-columns: 1fr; }
+                    .fin-chart-box:nth-child(2) { border-right: none; }
+                    .fin-panel-kpis { grid-template-columns: 1fr 1fr; }
+                }
+                </style>
+
+                <script>
+                // ── helpers ──────────────────────────────────────────
+                const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+                const gridColor  = () => isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+                const labelColor = () => isDark() ? '#94a3b8' : '#64748b';
+                const chartInstances = {};
+
+                function destroyChart(id) {
+                    if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+                }
+
+                // ── dados simulados ───────────────────────────────────
+                const MESES = ['Nov','Dez','Jan','Fev','Mar','Abr'];
+
+                // PAGAR
+                const dataPagarSemanas = {
+                    labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+                    pagar: [12400, 18700, 9800, 21300]
+                };
+                const dataPagarFornecedores = {
+                    labels: ['Fornec. Alpha','Beta Ltda','Gama S/A','Delta ME','Outros'],
+                    values: [23400, 18200, 14700, 9300, 18720]
+                };
+                const dataPagarFluxo = {
+                    labels: MESES,
+                    previsto:  [68000, 72000, 61000, 75000, 80000, 84320],
+                    realizado: [65200, 70100, 60800, 73500, 78900, 52100]
+                };
+
+                // RECEBER
+                const dataReceberPrevReal = {
+                    labels: MESES,
+                    previsto:  [95000,102000,88000,115000,121000,138750],
+                    realizado: [91000, 98500,85200,112000,118400, 67400]
+                };
+                const dataReceberStatus = {
+                    labels: ['Em Dia','A Vencer','Vencido','Inadimplente'],
+                    values: [67400, 49050, 22300, 22300]
+                };
+                const dataReceberInadim = {
+                    labels: MESES,
+                    valores: [8200, 9100, 7800, 11200, 18700, 22300]
+                };
+
+                // ── render charts ─────────────────────────────────────
+                function renderChartsPanel(tipo) {
+                    const dark = isDark();
+                    const gc = gridColor(), lc = labelColor();
+                    const fontDef = { family: 'Inter, sans-serif', size: 11 };
+                    const baseOpts = {
+                        responsive: true, maintainAspectRatio: false,
+                        animation: { duration: 400 },
+                        plugins: { legend: { labels: { color: lc, font: fontDef, boxWidth: 12 } } },
+                        scales: {
+                            x: { ticks: { color: lc, font: fontDef }, grid: { color: gc } },
+                            y: { ticks: { color: lc, font: fontDef, callback: v => 'R$' + (v/1000).toFixed(0)+'k' }, grid: { color: gc } }
+                        }
+                    };
+
+                    if (tipo === 'pagar') {
+                        destroyChart('pagar-semanas');
+                        destroyChart('pagar-fornecedores');
+                        destroyChart('pagar-fluxo');
+
+                        chartInstances['pagar-semanas'] = new Chart(
+                            document.getElementById('chart-pagar-semanas'),
+                            { type: 'bar', data: {
+                                labels: dataPagarSemanas.labels,
+                                datasets: [{ label: 'A Vencer (R$)', data: dataPagarSemanas.pagar,
+                                    backgroundColor: ['rgba(239,68,68,0.75)','rgba(249,115,22,0.75)','rgba(239,68,68,0.55)','rgba(220,38,38,0.8)'],
+                                    borderRadius: 6, borderSkipped: false }]
+                            }, options: { ...baseOpts, plugins: { legend: { display: false } } } }
+                        );
+
+                        chartInstances['pagar-fornecedores'] = new Chart(
+                            document.getElementById('chart-pagar-fornecedores'),
+                            { type: 'doughnut', data: {
+                                labels: dataPagarFornecedores.labels,
+                                datasets: [{ data: dataPagarFornecedores.values,
+                                    backgroundColor: ['#ef4444','#f97316','#f59e0b','#dc2626','#94a3b8'],
+                                    borderWidth: 2, borderColor: dark ? '#1e293b' : '#fff' }]
+                            }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 400 },
+                                plugins: { legend: { position: 'right', labels: { color: lc, font: fontDef, boxWidth: 12 } } },
+                                cutout: '60%'
+                            } }
+                        );
+
+                        chartInstances['pagar-fluxo'] = new Chart(
+                            document.getElementById('chart-pagar-fluxo'),
+                            { type: 'line', data: {
+                                labels: dataPagarFluxo.labels,
+                                datasets: [
+                                    { label: 'Previsto', data: dataPagarFluxo.previsto, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#f97316' },
+                                    { label: 'Realizado', data: dataPagarFluxo.realizado, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#ef4444' }
+                                ]
+                            }, options: baseOpts }
+                        );
+                    }
+
+                    if (tipo === 'receber') {
+                        destroyChart('receber-prevreal');
+                        destroyChart('receber-status');
+                        destroyChart('receber-inadim');
+
+                        chartInstances['receber-prevreal'] = new Chart(
+                            document.getElementById('chart-receber-prevreal'),
+                            { type: 'bar', data: {
+                                labels: dataReceberPrevReal.labels,
+                                datasets: [
+                                    { label: 'Previsto', data: dataReceberPrevReal.previsto, backgroundColor: 'rgba(16,185,129,0.35)', borderRadius: 5, borderSkipped: false },
+                                    { label: 'Realizado', data: dataReceberPrevReal.realizado, backgroundColor: 'rgba(13,148,136,0.75)', borderRadius: 5, borderSkipped: false }
+                                ]
+                            }, options: baseOpts }
+                        );
+
+                        chartInstances['receber-status'] = new Chart(
+                            document.getElementById('chart-receber-status'),
+                            { type: 'doughnut', data: {
+                                labels: dataReceberStatus.labels,
+                                datasets: [{ data: dataReceberStatus.values,
+                                    backgroundColor: ['#10b981','#3b82f6','#f59e0b','#ef4444'],
+                                    borderWidth: 2, borderColor: dark ? '#1e293b' : '#fff' }]
+                            }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 400 },
+                                plugins: { legend: { position: 'right', labels: { color: lc, font: fontDef, boxWidth: 12 } } },
+                                cutout: '60%'
+                            } }
+                        );
+
+                        chartInstances['receber-inadim'] = new Chart(
+                            document.getElementById('chart-receber-inadim'),
+                            { type: 'line', data: {
+                                labels: dataReceberInadim.labels,
+                                datasets: [{
+                                    label: 'Inadimplência (R$)', data: dataReceberInadim.valores,
+                                    borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)',
+                                    tension: 0.4, fill: true, pointRadius: 5,
+                                    pointBackgroundColor: '#ef4444', pointBorderColor: '#fff', pointBorderWidth: 2
+                                }]
+                            }, options: baseOpts }
+                        );
+                    }
+                }
+
+                // ── abrir / fechar painéis ────────────────────────────
+                function openFinPanel(tipo) {
+                    // fecha o outro se estiver aberto
+                    const outro = tipo === 'pagar' ? 'receber' : 'pagar';
+                    const elOutro = document.getElementById('fin-panel-' + outro);
+                    if (elOutro) elOutro.style.display = 'none';
+
+                    const el = document.getElementById('fin-panel-' + tipo);
+                    if (!el) return;
+
+                    // toggle: se já está aberto, fecha
+                    if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+
+                    el.style.display = 'block';
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    // pequeno delay para o canvas estar visível antes de renderizar
+                    setTimeout(() => renderChartsPanel(tipo), 80);
+                }
+
+                function closeFinPanel(tipo) {
+                    const el = document.getElementById('fin-panel-' + tipo);
+                    if (el) el.style.display = 'none';
+                }
+                </script>
+
                 <!-- OUTROS CONTROLES -->
                 <div class="cad-section-label" style="margin-top:1.5rem"><i class="fas fa-sliders-h"></i> Outros Controles</div>
-                <div class="fin-btn-group">
-                    <button class="fin-pill-btn" onclick="showToast('GCP - Controle de Comissionamento')">
-                        <i class="fas fa-percentage"></i> GCP - Controle de Comissionamento
+                <div class="fin-btn-group" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.75rem;">
+                    <button class="estoque-nav-btn enb-oc-1" onclick="showToast('GCP - Controle de Comissionamento')">
+                        <i class="fas fa-percentage"></i>
+                        <span>GCP - Controle de Comissionamento</span>
                     </button>
-                    <button class="fin-pill-btn" onclick="showToast('Consulta baixas')">
-                        <i class="fas fa-search-dollar"></i> Consulta baixas
+                    <button class="estoque-nav-btn enb-oc-2" onclick="showToast('Consulta baixas')">
+                        <i class="fas fa-search-dollar"></i>
+                        <span>Consulta baixas</span>
                     </button>
-                    <button class="fin-pill-btn" onclick="showToast('Controle Cheques Clientes')">
-                        <i class="fas fa-money-check"></i> Controle Cheques Clientes
+                    <button class="estoque-nav-btn enb-oc-3" onclick="showToast('Controle Cheques Clientes')">
+                        <i class="fas fa-money-check"></i>
+                        <span>Controle Cheques Clientes</span>
                     </button>
                 </div>
 
@@ -4801,37 +5152,48 @@
                     padding: 0.875rem 1rem;
                     box-shadow: var(--shadow-sm);
                 }
+                /* ── Botões degradê partindo do laranja ── */
                 .fin-pill-btn {
                     display: inline-flex;
                     align-items: center;
-                    gap: 0.4rem;
-                    padding: 0.45rem 0.95rem;
-                    background: var(--bg-primary);
-                    border: 1.5px solid var(--border);
-                    border-radius: 20px;
+                    gap: 0.5rem;
+                    padding: 0.5rem 1.1rem;
+                    background: linear-gradient(135deg, #ff6b35 0%, #ff3d77 100%);
+                    border: none;
+                    border-radius: 10px;
                     font-family: 'Inter', sans-serif;
                     font-size: 0.8rem;
-                    font-weight: 600;
-                    color: var(--text-primary);
+                    font-weight: 700;
+                    color: #fff;
                     cursor: pointer;
-                    transition: all 0.15s;
+                    transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
                     white-space: nowrap;
+                    box-shadow: 0 3px 12px rgba(255,61,119,0.4);
+                    letter-spacing: 0.01em;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
                 }
-                .fin-pill-btn i { font-size: 0.75rem; color: var(--primary); }
+                .fin-pill-btn i {
+                    font-size: 0.78rem;
+                    color: rgba(255,255,255,0.9);
+                    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+                }
                 .fin-pill-btn:hover {
-                    border-color: var(--primary);
-                    color: var(--primary);
-                    background: rgba(14,165,233,0.07);
-                    transform: translateY(-1px);
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+                    background: linear-gradient(135deg, #ff8c5a 0%, #ff5e91 100%);
+                    transform: translateY(-2px);
+                    box-shadow: 0 7px 20px rgba(255,61,119,0.5);
                 }
+                .fin-pill-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(255,61,119,0.3); }
+                /* Destaque: laranja → roxo — para Contas Correntes e Contas Gerenciais */
                 .fin-pill-highlight {
-                    background: rgba(14,165,233,0.07);
-                    border-color: rgba(14,165,233,0.4);
-                    color: var(--primary);
+                    background: linear-gradient(135deg, #ff6b35 0%, #9b3dff 100%);
+                    box-shadow: 0 3px 12px rgba(155,61,255,0.45);
                 }
-                .fin-pill-highlight i { color: var(--primary); }
-                .fin-pill-highlight:hover { background: rgba(14,165,233,0.14); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+                .fin-pill-highlight i { color: rgba(255,255,255,0.92); }
+                .fin-pill-highlight:hover {
+                    background: linear-gradient(135deg, #ff8c5a 0%, #b45eff 100%);
+                    box-shadow: 0 7px 20px rgba(155,61,255,0.55);
+                    transform: translateY(-2px);
+                }
                 </style>
             </div>
 
@@ -8118,5 +8480,601 @@
         }
     }
     </script>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL — GESTÃO DE PEDIDOS / ORDENS DE SERVIÇO
+     ══════════════════════════════════════════════════════ -->
+<div id="modal-gestao" class="gst-overlay" onclick="gstOverlayClick(event)">
+  <div class="gst-window" id="gst-window">
+
+    <!-- Barra de título -->
+    <div class="gst-titlebar" id="gst-titlebar">
+      <div class="gst-titlebar-left">
+        <i class="fas fa-grip-lines gst-drag-icon"></i>
+        <span class="gst-titlebar-text" id="gst-title-text">
+          Gestão de <strong id="gst-t1" style="color:#0ea5e9">Pedidos</strong>
+          <span style="color:#f59e0b" id="gst-t2">Orçamentos</span>
+          e <strong id="gst-t3">Ordens de Serviço</strong>
+        </span>
+      </div>
+      <button class="gst-titlebar-close" onclick="closeGestaoModal()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="gst-toolbar">
+      <button class="gst-tb-btn gst-tb-incluir" onclick="gstAction('Incluir')">
+        <span class="gst-tb-icon"><i class="fas fa-plus-circle"></i></span>
+        <span class="gst-tb-label">Incluir</span>
+      </button>
+      <button class="gst-tb-btn gst-tb-alterar" onclick="gstAction('Alterar')">
+        <span class="gst-tb-icon"><i class="fas fa-edit"></i></span>
+        <span class="gst-tb-label">Alterar</span>
+      </button>
+      <button class="gst-tb-btn gst-tb-clonar" onclick="gstAction('Clonar')">
+        <span class="gst-tb-icon"><i class="fas fa-copy"></i></span>
+        <span class="gst-tb-label">Clonar</span>
+      </button>
+      <button class="gst-tb-btn gst-tb-excluir" onclick="gstAction('Excluir')">
+        <span class="gst-tb-icon"><i class="fas fa-trash"></i></span>
+        <span class="gst-tb-label">Excluir</span>
+      </button>
+      <div class="gst-tb-sep"></div>
+      <button class="gst-tb-btn gst-tb-imprimir" onclick="gstAction('Imprimir')">
+        <span class="gst-tb-icon"><i class="fas fa-print"></i></span>
+        <span class="gst-tb-label">Imprimir</span>
+      </button>
+      <div class="gst-tb-sep"></div>
+      <button class="gst-tb-btn gst-tb-opcoes" onclick="gstAction('Opções')">
+        <span class="gst-tb-icon"><i class="fas fa-cog"></i></span>
+        <span class="gst-tb-label">Opções</span>
+      </button>
+      <div class="gst-tb-sep" style="margin-left:auto"></div>
+      <button class="gst-tb-btn gst-tb-sair" onclick="closeGestaoModal()">
+        <span class="gst-tb-icon"><i class="fas fa-sign-out-alt"></i></span>
+        <span class="gst-tb-label">Sair</span>
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="gst-filters">
+      <div class="gst-filter-group">
+        <label class="gst-filter-label">Tipo</label>
+        <select class="gst-filter-select" id="gst-filtro-tipo" onchange="gstAplicarFiltros()">
+          <option>Orçamentos - Pedidos - OS</option>
+          <option>Apenas Pedidos</option>
+          <option>Apenas Orçamentos</option>
+          <option>Apenas OS</option>
+        </select>
+      </div>
+      <div class="gst-filter-group">
+        <label class="gst-filter-label">Situação</label>
+        <select class="gst-filter-select" id="gst-filtro-sit" onchange="gstAplicarFiltros()">
+          <option>Todas</option>
+          <option selected>Pendente</option>
+          <option>Aprovado</option>
+          <option>Cancelado</option>
+          <option>Finalizado</option>
+        </select>
+      </div>
+      <div class="gst-filter-group">
+        <label class="gst-filter-label">ID</label>
+        <div style="display:flex;align-items:center;gap:3px">
+          <input class="gst-filter-input" style="width:72px" type="text" placeholder="0" id="gst-filtro-id">
+          <button class="gst-filter-icon-btn"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+      <div class="gst-filter-group">
+        <label class="gst-filter-label">Período</label>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input class="gst-filter-input" style="width:96px" type="text" placeholder="01/05/2026" id="gst-filtro-de">
+          <span style="font-size:0.72rem;color:var(--text-muted)">a</span>
+          <input class="gst-filter-input" style="width:96px" type="text" placeholder="31/05/2026" id="gst-filtro-ate">
+        </div>
+      </div>
+      <div class="gst-filter-group">
+        <label class="gst-filter-label">Quanto à emissão</label>
+        <select class="gst-filter-select" style="min-width:140px">
+          <option>Todos</option>
+          <option>Hoje</option>
+          <option>Esta semana</option>
+          <option>Este mês</option>
+        </select>
+      </div>
+      <button class="gst-btn-filtro" onclick="gstAplicarFiltros()"><i class="fas fa-filter"></i> + Filtro</button>
+    </div>
+
+    <!-- Barra de seleção -->
+    <div class="gst-selbar">
+      <span class="gst-selbar-label">Seleção de Registros</span>
+      <button class="gst-sel-btn gst-sel-blue" onclick="gstSelectAll()">Seleciona</button>
+      <button class="gst-sel-btn gst-sel-blue" onclick="gstDeselectAll()">Remove seleção</button>
+      <button class="gst-sel-btn gst-sel-blue" onclick="gstSelectAll()">Todos</button>
+      <button class="gst-sel-btn gst-sel-blue" onclick="gstDeselectAll()">Nenhum</button>
+      <button class="gst-sel-btn gst-sel-green" style="margin-left:auto" onclick="gstAction('Personalizar Grid')">Personalizar Grid</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="gst-table-wrap">
+      <table class="gst-table" id="gst-table">
+        <thead>
+          <tr>
+            <th style="width:28px"><input type="checkbox" id="gst-chk-all" onchange="gstToggleAll(this)"></th>
+            <th style="width:50px">ID</th>
+            <th style="width:80px">Tipo</th>
+            <th style="width:80px">Vendedor</th>
+            <th style="width:90px">Situação</th>
+            <th style="width:180px">Nome - Destinatário</th>
+            <th style="width:110px">Documento</th>
+            <th style="width:110px">Celular</th>
+            <th style="width:100px">Fone</th>
+            <th style="width:90px">Data</th>
+            <th style="width:120px">Prev.Entrega (Dt)</th>
+            <th style="width:110px">Data Entrega</th>
+            <th style="width:100px">R$ Total</th>
+            <th style="width:90px">Prazo Entr.</th>
+            <th style="width:80px">Placa</th>
+          </tr>
+        </thead>
+        <tbody id="gst-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Paginação / status bar -->
+    <div class="gst-statusbar">
+      <div class="gst-status-legend">
+        <span class="gst-legend-item"><span class="gst-legend-dot" style="background:#0ea5e9"></span><span class="gst-legend-txt">Aberto</span></span>
+        <span class="gst-legend-item"><span class="gst-legend-dot" style="background:#10b981"></span><span class="gst-legend-txt">Finalizado</span></span>
+        <span class="gst-legend-item"><span class="gst-legend-dot" style="background:#ef4444"></span><span class="gst-legend-txt">Cancelado</span></span>
+        <span class="gst-legend-item"><span class="gst-legend-dot" style="background:#f59e0b"></span><span class="gst-legend-txt">Pendente</span></span>
+      </div>
+      <div class="gst-pagination">
+        <button class="gst-pg-btn" onclick="gstPgFirst()"><i class="fas fa-angle-double-left"></i></button>
+        <button class="gst-pg-btn" onclick="gstPgPrev()"><i class="fas fa-angle-left"></i></button>
+        <span class="gst-pg-info">Página <strong id="gst-pg-cur">1</strong> de <strong id="gst-pg-tot">1</strong></span>
+        <button class="gst-pg-btn" onclick="gstPgNext()"><i class="fas fa-angle-right"></i></button>
+        <button class="gst-pg-btn" onclick="gstPgLast()"><i class="fas fa-angle-double-right"></i></button>
+        <button class="gst-pg-btn" onclick="gstReload()" title="Atualizar"><i class="fas fa-sync-alt"></i></button>
+      </div>
+      <div class="gst-status-qtde">Total: <span id="gst-total-count">0</span> registros</div>
+    </div>
+
+  </div><!-- /gst-window -->
+</div><!-- /gst-overlay -->
+
+<style>
+/* ══ OVERLAY ══ */
+.gst-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.gst-overlay.open { display: flex; }
+
+/* ══ JANELA — tela cheia ══ */
+.gst-window {
+    background: var(--bg-primary);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: gstIn 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes gstIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+}
+
+/* ══ TITLEBAR ══ */
+.gst-titlebar {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 1rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    cursor: default;
+    user-select: none;
+}
+.gst-titlebar-left { display: flex; align-items: center; gap: 0.6rem; }
+.gst-drag-icon { color: rgba(255,255,255,0.25); font-size: 0.85rem; cursor: grab; }
+.gst-titlebar-text { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; }
+.gst-titlebar-close {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #ef4444;
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem;
+    transition: all 0.15s;
+}
+.gst-titlebar-close:hover { background: #ef4444; color: #fff; }
+
+/* ══ TOOLBAR ══ */
+.gst-toolbar {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.gst-tb-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0.3rem 0.7rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+    min-width: 54px;
+    color: var(--text-primary);
+}
+.gst-tb-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(14,165,233,0.28);
+}
+.gst-tb-icon { font-size: 1.05rem; line-height: 1; }
+.gst-tb-label { font-size: 0.68rem; font-weight: 600; white-space: nowrap; }
+.gst-tb-incluir .gst-tb-icon { color: #22c55e; }
+.gst-tb-incluir:hover .gst-tb-icon { color: #fff; }
+.gst-tb-alterar .gst-tb-icon { color: var(--primary); }
+.gst-tb-alterar:hover .gst-tb-icon { color: #fff; }
+.gst-tb-clonar .gst-tb-icon { color: #a78bfa; }
+.gst-tb-clonar:hover .gst-tb-icon { color: #fff; }
+.gst-tb-excluir .gst-tb-icon { color: var(--danger); }
+.gst-tb-excluir:hover .gst-tb-icon { color: #fff; }
+.gst-tb-excluir:hover { background: var(--danger); border-color: var(--danger); }
+.gst-tb-imprimir .gst-tb-icon { color: var(--text-secondary); }
+.gst-tb-imprimir:hover .gst-tb-icon { color: #fff; }
+.gst-tb-opcoes .gst-tb-icon { color: var(--warning); }
+.gst-tb-opcoes:hover .gst-tb-icon { color: #fff; }
+.gst-tb-sair { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.2); }
+.gst-tb-sair .gst-tb-icon { color: var(--danger); }
+.gst-tb-sair:hover { background: var(--danger); border-color: var(--danger); }
+.gst-tb-sep {
+    width: 1px;
+    background: var(--border);
+    margin: 0.2rem 0.15rem;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+/* ══ FILTROS ══ */
+.gst-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.gst-filter-group { display: flex; flex-direction: column; gap: 2px; }
+.gst-filter-label { font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+.gst-filter-select, .gst-filter-input {
+    height: 26px;
+    padding: 0 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+    min-width: 130px;
+}
+.gst-filter-select:focus, .gst-filter-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(14,165,233,0.12); }
+.gst-filter-icon-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    height: 26px; width: 26px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-secondary); font-size: 0.72rem;
+    transition: all 0.15s;
+}
+.gst-filter-icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.gst-btn-filtro {
+    background: #fff;
+    border: 2px solid #0f172a;
+    border-radius: 20px;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #0f172a;
+    display: flex; align-items: center; gap: 0.35rem;
+    transition: all 0.15s;
+    align-self: flex-end;
+    white-space: nowrap;
+}
+[data-theme="dark"] .gst-btn-filtro { background: var(--bg-tertiary); border-color: var(--border); color: var(--text-primary); }
+.gst-btn-filtro:hover { background: #0f172a; color: #fff; }
+[data-theme="dark"] .gst-btn-filtro:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ══ BARRA SELEÇÃO ══ */
+.gst-selbar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    background: #0f172a;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.gst-selbar-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+    margin-right: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.gst-sel-btn {
+    padding: 0.22rem 0.7rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: filter 0.15s;
+}
+.gst-sel-btn:hover { filter: brightness(1.15); }
+.gst-sel-blue { background: #1d4ed8; color: #fff; }
+.gst-sel-green { background: #16a34a; color: #fff; }
+
+/* ══ TABELA ══ */
+.gst-table-wrap {
+    flex: 1;
+    overflow: auto;
+    background: var(--bg-primary);
+    min-height: 0;
+}
+.gst-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    table-layout: fixed;
+    min-width: 900px;
+}
+.gst-table thead tr {
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border);
+    position: sticky; top: 0; z-index: 1;
+}
+.gst-table th {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    text-align: left;
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+.gst-table th:hover { color: var(--primary); }
+.gst-table th:last-child { border-right: none; }
+.gst-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+.gst-table tbody tr:hover { background: var(--table-row-hover); }
+.gst-table tbody tr.gst-selected { background: rgba(14,165,233,0.1); }
+.gst-table tbody td {
+    padding: 0.35rem 0.55rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-right: 1px solid var(--border-light);
+}
+.gst-table tbody td:last-child { border-right: none; }
+/* badges */
+.gst-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.68rem; font-weight: 700;
+    padding: 2px 6px; border-radius: 9px;
+}
+.gst-badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.gst-b-pendente   { color: #f59e0b; background: rgba(245,158,11,0.12); }
+.gst-b-pendente .gst-badge-dot   { background: #f59e0b; }
+.gst-b-aprovado   { color: #10b981; background: rgba(16,185,129,0.12); }
+.gst-b-aprovado .gst-badge-dot   { background: #10b981; }
+.gst-b-cancelado  { color: #ef4444; background: rgba(239,68,68,0.12); }
+.gst-b-cancelado .gst-badge-dot  { background: #ef4444; }
+.gst-b-finalizado { color: #0ea5e9; background: rgba(14,165,233,0.12); }
+.gst-b-finalizado .gst-badge-dot { background: #0ea5e9; }
+
+/* ══ STATUS BAR ══ */
+.gst-statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0.75rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.gst-status-legend { display: flex; align-items: center; gap: 0.875rem; flex-wrap: wrap; }
+.gst-legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 700; }
+.gst-legend-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.gst-legend-txt { color: var(--text-secondary); }
+.gst-pagination { display: flex; align-items: center; gap: 3px; }
+.gst-pg-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-secondary); font-size: 0.72rem;
+    transition: all 0.15s;
+}
+.gst-pg-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.gst-pg-info { font-size: 0.72rem; color: var(--text-secondary); padding: 0 0.4rem; white-space: nowrap; }
+.gst-status-qtde { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.gst-status-qtde span { color: var(--text-primary); }
+</style>
+
+<script>
+// ── Dados simulados ────────────────────────────────────
+const GST_DATA_PEDIDOS = [
+    { id:1042, tipo:'Pedido',    vendedor:'Carlos',  sit:'Pendente',  nome:'Auto Peças Brilho Ltda',     doc:'12.345.678/0001-99', cel:'(81) 98765-4321', fone:'(81) 3222-1111', data:'02/05/2026', prevEnt:'05/05/2026', dataEnt:'',          total:'R$ 3.450,00', prazo:'3 dias', placa:'ABC-1234' },
+    { id:1041, tipo:'Orçamento', vendedor:'Ana',     sit:'Aprovado',  nome:'Distribuidora Norte S/A',    doc:'98.765.432/0001-11', cel:'(81) 99988-7766', fone:'(81) 3333-2222', data:'01/05/2026', prevEnt:'06/05/2026', dataEnt:'',          total:'R$ 8.200,00', prazo:'5 dias', placa:'' },
+    { id:1040, tipo:'OS',        vendedor:'Roberto', sit:'Pendente',  nome:'João da Silva',              doc:'123.456.789-00',      cel:'(81) 91234-5678', fone:'',              data:'30/04/2026', prevEnt:'04/05/2026', dataEnt:'',          total:'R$ 750,00',   prazo:'4 dias', placa:'XYZ-9876' },
+    { id:1039, tipo:'Pedido',    vendedor:'Carlos',  sit:'Finalizado',nome:'Mecânica Veloz ME',          doc:'55.444.333/0001-22', cel:'(81) 97777-3333', fone:'(81) 3444-5555', data:'29/04/2026', prevEnt:'02/05/2026', dataEnt:'02/05/2026',total:'R$ 5.120,00', prazo:'3 dias', placa:'DEF-5678' },
+    { id:1038, tipo:'Orçamento', vendedor:'Ana',     sit:'Cancelado', nome:'Transportes Ágil Ltda',      doc:'77.888.999/0001-33', cel:'(81) 96666-4444', fone:'(81) 3555-6666', data:'28/04/2026', prevEnt:'',          dataEnt:'',          total:'R$ 12.800,00',prazo:'7 dias', placa:'' },
+    { id:1037, tipo:'OS',        vendedor:'Marcos',  sit:'Aprovado',  nome:'Cláudia Ferreira',           doc:'987.654.321-00',      cel:'(81) 95555-5555', fone:'',              data:'27/04/2026', prevEnt:'30/04/2026', dataEnt:'30/04/2026',total:'R$ 480,00',   prazo:'3 dias', placa:'GHI-1111' },
+    { id:1036, tipo:'Pedido',    vendedor:'Carlos',  sit:'Aprovado',  nome:'Peças & Cia Comércio',       doc:'11.222.333/0001-44', cel:'(81) 94444-6666', fone:'(81) 3666-7777', data:'26/04/2026', prevEnt:'01/05/2026', dataEnt:'01/05/2026',total:'R$ 2.340,00', prazo:'5 dias', placa:'' },
+    { id:1035, tipo:'OS',        vendedor:'Roberto', sit:'Finalizado',nome:'Pedro Henrique Alves',       doc:'321.654.987-00',      cel:'(81) 93333-7777', fone:'',              data:'25/04/2026', prevEnt:'28/04/2026', dataEnt:'28/04/2026',total:'R$ 1.290,00', prazo:'3 dias', placa:'JKL-2222' },
+    { id:1034, tipo:'Pedido',    vendedor:'Ana',     sit:'Pendente',  nome:'Moto Parts Express',         doc:'44.555.666/0001-55', cel:'(81) 92222-8888', fone:'(81) 3777-8888', data:'24/04/2026', prevEnt:'03/05/2026', dataEnt:'',          total:'R$ 6.700,00', prazo:'9 dias', placa:'' },
+    { id:1033, tipo:'Orçamento', vendedor:'Marcos',  sit:'Pendente',  nome:'Fernanda Costa Ribeiro',     doc:'654.321.098-00',      cel:'(81) 91111-9999', fone:'',              data:'23/04/2026', prevEnt:'',          dataEnt:'',          total:'R$ 980,00',   prazo:'-',      placa:'MNO-3333' },
+    { id:1032, tipo:'OS',        vendedor:'Carlos',  sit:'Aprovado',  nome:'Auto Center Estrela Ltda',   doc:'22.333.444/0001-66', cel:'(81) 90000-1111', fone:'(81) 3888-9999', data:'22/04/2026', prevEnt:'26/04/2026', dataEnt:'26/04/2026',total:'R$ 3.870,00', prazo:'4 dias', placa:'PQR-4444' },
+    { id:1031, tipo:'Pedido',    vendedor:'Ana',     sit:'Cancelado', nome:'Luiz Eduardo Moraes',        doc:'789.012.345-00',      cel:'(81) 89999-2222', fone:'',              data:'21/04/2026', prevEnt:'',          dataEnt:'',          total:'R$ 1.650,00', prazo:'-',      placa:'' },
+];
+
+const GST_DATA_OS = GST_DATA_PEDIDOS.filter(r => r.tipo === 'OS');
+
+let gstCurrentData = [];
+let gstPage = 1;
+const GST_PER_PAGE = 8;
+let gstSelectedRows = new Set();
+
+function openGestaoModal(tipo) {
+    gstCurrentData = tipo === 'os' ? GST_DATA_OS : GST_DATA_PEDIDOS;
+    gstPage = 1;
+    gstSelectedRows.clear();
+    // título
+    const t1 = document.getElementById('gst-t1');
+    const t2 = document.getElementById('gst-t2');
+    const t3 = document.getElementById('gst-t3');
+    if (tipo === 'os') {
+        t1.textContent = 'Ordens de'; t1.style.color = '#a78bfa';
+        t2.textContent = 'Serviço'; t2.style.color = '#a78bfa';
+        t3.textContent = '';
+    } else {
+        t1.textContent = 'Pedidos'; t1.style.color = '#0ea5e9';
+        t2.textContent = 'Orçamentos'; t2.style.color = '#f59e0b';
+        t3.textContent = 'Ordens de Serviço';
+    }
+    document.getElementById('modal-gestao').classList.add('open');
+    gstRender();
+}
+
+function closeGestaoModal() {
+    document.getElementById('modal-gestao').classList.remove('open');
+}
+
+function gstOverlayClick(e) {
+    if (e.target.id === 'modal-gestao') closeGestaoModal();
+}
+
+function gstAplicarFiltros() {
+    gstPage = 1;
+    gstRender();
+}
+
+function gstRender() {
+    const sit = document.getElementById('gst-filtro-sit').value;
+    const idVal = document.getElementById('gst-filtro-id').value.trim();
+    let filtered = gstCurrentData.filter(r => {
+        if (sit !== 'Todas' && r.sit !== sit) return false;
+        if (idVal && idVal !== '0' && !String(r.id).includes(idVal)) return false;
+        return true;
+    });
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / GST_PER_PAGE));
+    if (gstPage > totalPages) gstPage = totalPages;
+    const slice = filtered.slice((gstPage-1)*GST_PER_PAGE, gstPage*GST_PER_PAGE);
+
+    document.getElementById('gst-pg-cur').textContent = gstPage;
+    document.getElementById('gst-pg-tot').textContent = totalPages;
+    document.getElementById('gst-total-count').textContent = total;
+
+    const badgeMap = {
+        'Pendente':   'gst-b-pendente',
+        'Aprovado':   'gst-b-aprovado',
+        'Cancelado':  'gst-b-cancelado',
+        'Finalizado': 'gst-b-finalizado',
+    };
+
+    const tbody = document.getElementById('gst-tbody');
+    if (slice.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.82rem"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;opacity:0.4"></i>Nenhum registro encontrado</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = slice.map(r => {
+        const cls = badgeMap[r.sit] || '';
+        const sel = gstSelectedRows.has(r.id) ? 'gst-selected' : '';
+        return `<tr class="${sel}" onclick="gstToggleRow(${r.id}, this)">
+            <td onclick="event.stopPropagation()"><input type="checkbox" ${gstSelectedRows.has(r.id)?'checked':''} onchange="gstToggleRow(${r.id}, this.closest('tr'))"></td>
+            <td><strong>${r.id}</strong></td>
+            <td>${r.tipo}</td>
+            <td>${r.vendedor}</td>
+            <td><span class="gst-badge ${cls}"><span class="gst-badge-dot"></span>${r.sit}</span></td>
+            <td title="${r.nome}">${r.nome}</td>
+            <td>${r.doc}</td>
+            <td>${r.cel}</td>
+            <td>${r.fone}</td>
+            <td>${r.data}</td>
+            <td>${r.prevEnt}</td>
+            <td>${r.dataEnt}</td>
+            <td><strong>${r.total}</strong></td>
+            <td>${r.prazo}</td>
+            <td>${r.placa}</td>
+        </tr>`;
+    }).join('');
+}
+
+function gstToggleRow(id, tr) {
+    if (gstSelectedRows.has(id)) gstSelectedRows.delete(id);
+    else gstSelectedRows.add(id);
+    tr.classList.toggle('gst-selected', gstSelectedRows.has(id));
+    const cb = tr.querySelector('input[type=checkbox]');
+    if (cb) cb.checked = gstSelectedRows.has(id);
+}
+
+function gstToggleAll(chk) {
+    const rows = document.querySelectorAll('#gst-tbody tr');
+    rows.forEach(tr => {
+        const cb = tr.querySelector('input[type=checkbox]');
+        if (!cb) return;
+        const id = parseInt(tr.querySelector('td:nth-child(2)')?.textContent);
+        if (chk.checked) { gstSelectedRows.add(id); tr.classList.add('gst-selected'); cb.checked = true; }
+        else { gstSelectedRows.delete(id); tr.classList.remove('gst-selected'); cb.checked = false; }
+    });
+}
+
+function gstSelectAll() { document.getElementById('gst-chk-all').checked = true; gstToggleAll({checked:true}); }
+function gstDeselectAll() { document.getElementById('gst-chk-all').checked = false; gstToggleAll({checked:false}); }
+
+function gstPgFirst() { gstPage = 1; gstRender(); }
+function gstPgPrev()  { if (gstPage > 1) { gstPage--; gstRender(); } }
+function gstPgNext()  { const tot = Math.ceil(gstCurrentData.length/GST_PER_PAGE); if (gstPage < tot) { gstPage++; gstRender(); } }
+function gstPgLast()  { gstPage = Math.ceil(gstCurrentData.length/GST_PER_PAGE); gstRender(); }
+function gstReload()  { gstRender(); }
+
+function gstAction(acao) { showToast(acao); }
+</script>
 </body>
 </html>
