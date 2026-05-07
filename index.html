@@ -4626,13 +4626,13 @@
                 <div class="fin-cards-row">
 
                     <!-- Contas a Pagar -->
-                    <button class="estoque-nav-btn enb-fin-pagar" onclick="openFinPanel('pagar')">
+                    <button class="estoque-nav-btn enb-fin-pagar" onclick="openContasPagarModal()">
                         <i class="fas fa-arrow-up"></i>
                         <span>Contas a Pagar</span>
                     </button>
 
                     <!-- Contas a Receber -->
-                    <button class="estoque-nav-btn enb-fin-receber" onclick="openFinPanel('receber')">
+                    <button class="estoque-nav-btn enb-fin-receber" onclick="openContasReceberModal()">
                         <i class="fas fa-arrow-down"></i>
                         <span>Contas a Receber</span>
                     </button>
@@ -9075,6 +9075,1039 @@ function gstPgLast()  { gstPage = Math.ceil(gstCurrentData.length/GST_PER_PAGE);
 function gstReload()  { gstRender(); }
 
 function gstAction(acao) { showToast(acao); }
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL FULL-PAGE — CONTAS A PAGAR
+     ══════════════════════════════════════════════════════════ -->
+<div id="modal-contas-pagar" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg-primary);flex-direction:column;font-family:'Inter',sans-serif;">
+
+  <!-- ── HEADER ── -->
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);color:#fff;padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div style="width:32px;height:32px;background:rgba(239,68,68,0.25);border:1px solid rgba(239,68,68,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-arrow-up" style="color:#f87171;font-size:0.875rem;"></i>
+      </div>
+      <span style="font-size:1.0625rem;font-weight:700;letter-spacing:-0.01em;">Contas a Pagar</span>
+    </div>
+    <button onclick="closeContasPagarModal()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:0.35rem 0.875rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.4rem;transition:all 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(239,68,68,0.15)'">
+      <i class="fas fa-power-off"></i> Sair
+    </button>
+  </div>
+
+  <!-- ── FILTROS ── -->
+  <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0.875rem 1.5rem;flex-shrink:0;">
+    <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">
+      <i class="fas fa-filter"></i> Filtro (<span id="cp-filtro-count">0</span>)
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;">
+      <!-- Credor/Fornecedor -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:180px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Credor/Fornecedor</label>
+        <div style="display:flex;gap:0.35rem;">
+          <button onclick="showToast('Buscar Credor/Fornecedor')" style="background:var(--primary);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;" onmouseover="this.style.background='var(--primary-dark)'" onmouseout="this.style.background='var(--primary)'">
+            <i class="fas fa-search" style="font-size:0.75rem;"></i>
+          </button>
+          <input id="cp-credor" type="text" placeholder="Todos" style="flex:1;padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);min-width:0;" oninput="cpAplicarFiltros()">
+        </div>
+      </div>
+      <!-- Período -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Período de Vencimento</label>
+        <div style="display:flex;align-items:center;gap:0.35rem;">
+          <input id="cp-dt-ini" type="date" value="2026-05-01" style="padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;background:var(--input-bg);color:var(--text-primary);" oninput="cpAplicarFiltros()">
+          <span style="font-size:0.75rem;color:var(--text-muted);">até</span>
+          <input id="cp-dt-fim" type="date" value="2026-05-31" style="padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;background:var(--input-bg);color:var(--text-primary);" oninput="cpAplicarFiltros()">
+        </div>
+      </div>
+      <!-- Situação -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:145px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Situação</label>
+        <select id="cp-situacao" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" onchange="cpAplicarFiltros()">
+          <option value="Todas">Todas</option>
+          <option value="Pendentes" selected>Pendentes</option>
+          <option value="Pagos">Pagos</option>
+          <option value="Vencidos">Vencidos</option>
+          <option value="Cancelados">Cancelados</option>
+        </select>
+      </div>
+      <!-- Origem -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:145px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Origem</label>
+        <select id="cp-origem" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" onchange="cpAplicarFiltros()">
+          <option value="Todas">Todas</option>
+          <option value="Manual">Manual</option>
+          <option value="NF-e">NF-e</option>
+          <option value="Compras">Compras</option>
+        </select>
+      </div>
+    </div>
+    <!-- Descrição -->
+    <div style="margin-top:0.65rem;display:flex;flex-direction:column;gap:0.3rem;max-width:360px;">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Descrição/Docto (parcial)</label>
+      <input id="cp-descricao" type="text" placeholder="" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" oninput="cpAplicarFiltros()">
+    </div>
+  </div>
+
+  <!-- ── TOOLBAR ── -->
+  <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:0.5rem 1.25rem;display:flex;align-items:center;gap:0.25rem;flex-shrink:0;border-bottom:2px solid var(--primary);">
+    <button class="cp-tb-btn" onclick="showToast('Incluir título a pagar')">
+      <div class="cp-tb-icon" style="background:rgba(16,185,129,0.2);color:#10b981;"><i class="fas fa-plus"></i></div>
+      <span>Incluir</span>
+    </button>
+    <button class="cp-tb-btn" onclick="cpAlterar()">
+      <div class="cp-tb-icon" style="background:rgba(14,165,233,0.2);color:#38bdf8;"><i class="fas fa-edit"></i></div>
+      <span>Alterar</span>
+    </button>
+    <button class="cp-tb-btn" onclick="cpExcluir()">
+      <div class="cp-tb-icon" style="background:rgba(239,68,68,0.2);color:#f87171;"><i class="fas fa-trash-alt"></i></div>
+      <span>Excluir</span>
+    </button>
+    <div style="width:1px;height:36px;background:rgba(255,255,255,0.1);margin:0 0.25rem;"></div>
+    <button class="cp-tb-btn" onclick="showToast('Imprimir relatório')">
+      <div class="cp-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-print"></i></div>
+      <span>Imprimir</span>
+    </button>
+    <button class="cp-tb-btn" onclick="showToast('Baixar documento')">
+      <div class="cp-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-download"></i></div>
+      <span>Baixar documento</span>
+    </button>
+    <div style="position:relative;display:inline-block;">
+      <button class="cp-tb-btn" onclick="cpToggleOpcoes()" id="cp-opcoes-btn">
+        <div class="cp-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-ellipsis-h"></i></div>
+        <span>Opções <i class="fas fa-chevron-down" style="font-size:0.55rem;margin-left:2px;"></i></span>
+      </button>
+      <div id="cp-opcoes-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:100;min-width:190px;overflow:hidden;">
+        <button onclick="showToast('Baixa em lote');cpToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-check-double" style="color:var(--primary);width:14px;"></i> Baixa em Lote</button>
+        <button onclick="showToast('Renegociação');cpToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-handshake" style="color:var(--warning);width:14px;"></i> Renegociação</button>
+        <button onclick="showToast('Exportar Excel');cpToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-file-excel" style="color:#10b981;width:14px;"></i> Exportar Excel</button>
+        <button onclick="showToast('Cancelar título');cpToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;cursor:pointer;font-size:0.8rem;color:#ef4444;display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-ban" style="width:14px;"></i> Cancelar Título</button>
+      </div>
+    </div>
+    <!-- separador -->
+    <div style="flex:1;"></div>
+    <!-- Botão Gráficos -->
+    <button class="cp-tb-btn cp-btn-graficos" onclick="cpToggleGraficos()" id="cp-btn-graficos">
+      <div class="cp-tb-icon" style="background:rgba(139,92,246,0.2);color:#a78bfa;"><i class="fas fa-chart-bar"></i></div>
+      <span>Gráficos</span>
+    </button>
+    <!-- Totalizador -->
+    <div style="background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:0.35rem 1rem;text-align:right;margin-left:0.5rem;min-width:110px;">
+      <div style="font-size:0.65rem;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;">PAGAR (<span id="cp-total-count">0</span>)</div>
+      <div style="font-size:1rem;font-weight:800;color:#fff;" id="cp-total-valor">R$ 0,00</div>
+    </div>
+  </div>
+
+  <!-- ── CORPO SCROLLÁVEL ── -->
+  <div id="cp-scroll-body" style="flex:1;overflow-y:auto;overflow-x:auto;">
+
+  <!-- ── PAINEL DE GRÁFICOS (colapsável) ── -->
+  <div id="cp-graficos-panel" style="display:none;background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:1rem 1.5rem;flex-shrink:0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:1rem;">
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Vencimentos por Semana</div>
+        <div style="position:relative;height:130px;"><canvas id="cp-chart-semanas"></canvas></div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Top Fornecedores em Aberto</div>
+        <div style="position:relative;height:130px;"><canvas id="cp-chart-fornecedores"></canvas></div>
+      </div>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Fluxo de Pagamentos — Últimos 6 Meses</div>
+        <div style="position:relative;height:130px;"><canvas id="cp-chart-fluxo"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TABELA ── -->
+  <div style="position:relative;">
+    <table id="cp-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:1100px;">
+      <thead>
+        <tr style="background:linear-gradient(135deg,#1e293b,#0f172a);color:#94a3b8;position:sticky;top:0;z-index:10;">
+          <th style="width:32px;padding:0.6rem 0.75rem;border-bottom:2px solid var(--primary);text-align:center;"><input type="checkbox" id="cp-chk-all" onchange="cpToggleAll(this)" style="cursor:pointer;accent-color:var(--primary);"></th>
+          <th class="cp-th" onclick="cpSort('vencto')" title="Ordenar por Vencto">Vencto <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+          <th class="cp-th" onclick="cpSort('vlconf')">VL.Conf. <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+          <th class="cp-th" onclick="cpSort('vlpago')">VL.Pago <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+          <th class="cp-th" onclick="cpSort('saldo')">Saldo <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+          <th class="cp-th" onclick="cpSort('credor')" style="min-width:180px;">Credor/Fornecedor <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+          <th class="cp-th" style="min-width:160px;">Referência / Histórico</th>
+          <th class="cp-th">Tp.Doc</th>
+          <th class="cp-th">Acrésc.Pago</th>
+          <th class="cp-th">Descontado</th>
+          <th class="cp-th">Dt.Cad.</th>
+          <th class="cp-th">Vencto Rep.</th>
+          <th class="cp-th">Ace</th>
+          <th class="cp-th">ID</th>
+        </tr>
+      </thead>
+      <tbody id="cp-tbody">
+        <!-- preenchido por JS -->
+      </tbody>
+    </table>
+    <!-- empty state -->
+    <div id="cp-empty" style="display:none;text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+      <i class="fas fa-inbox" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:1rem;"></i>
+      <div style="font-size:0.875rem;font-weight:600;">Nenhum título encontrado</div>
+      <div style="font-size:0.78rem;margin-top:0.25rem;">Ajuste os filtros e tente novamente</div>
+    </div>
+  </div>
+
+  </div><!-- /cp-scroll-body -->
+
+  <!-- ── STATUS BAR / PAGINAÇÃO ── -->
+  <div style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:0.35rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;flex-wrap:wrap;position:sticky;bottom:0;z-index:20;">
+    <div style="display:flex;align-items:center;gap:0.875rem;flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#f97316;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Pendente</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#ef4444;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Vencido</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#10b981;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Pago</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#94a3b8;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Cancelado</span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.4rem;">
+      <span style="font-size:0.72rem;color:var(--text-secondary);margin-right:0.25rem;">Página</span>
+      <button onclick="cpPgFirst()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-double-left"></i></button>
+      <button onclick="cpPgPrev()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-left"></i></button>
+      <span style="font-size:0.72rem;color:var(--text-secondary);padding:0 0.4rem;white-space:nowrap;"><span id="cp-pg-cur">1</span> de <span id="cp-pg-tot">1</span></span>
+      <button onclick="cpPgNext()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-right"></i></button>
+      <button onclick="cpPgLast()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-double-right"></i></button>
+      <button onclick="cpRender()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;margin-left:2px;" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'" title="Recarregar"><i class="fas fa-sync-alt"></i></button>
+      <span style="font-size:0.72rem;color:var(--text-secondary);margin-left:0.5rem;white-space:nowrap;">Total: <strong style="color:var(--text-primary);" id="cp-qtde-total">0</strong> títulos</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ESTILOS DO MODAL ── -->
+<style>
+  #modal-contas-pagar { animation: cpFadeIn 0.2s ease; }
+  @keyframes cpFadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .cp-th {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--primary);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    transition: color 0.15s;
+  }
+  .cp-th:hover { color: #fff; }
+
+  #cp-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+    cursor: pointer;
+  }
+  #cp-table tbody tr:hover { background: var(--table-row-hover); }
+  #cp-table tbody tr.cp-selected { background: rgba(14,165,233,0.1); }
+  #cp-table tbody td {
+    padding: 0.5rem 0.75rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    border-right: 1px solid var(--border-light);
+  }
+  #cp-table tbody tr.cp-vencido td:first-child { border-left: 3px solid #ef4444; }
+  #cp-table tbody tr.cp-pendente td:first-child { border-left: 3px solid #f97316; }
+  #cp-table tbody tr.cp-pago td:first-child { border-left: 3px solid #10b981; }
+  #cp-table tbody tr.cp-cancelado td:first-child { border-left: 3px solid #94a3b8; }
+
+  .cp-sit-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 9999px;
+    font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .cp-sit-pendente  { background: rgba(249,115,22,0.12); color: #f97316; }
+  .cp-sit-vencido   { background: rgba(239,68,68,0.12);  color: #ef4444; }
+  .cp-sit-pago      { background: rgba(16,185,129,0.12); color: #10b981; }
+  .cp-sit-cancelado { background: rgba(148,163,184,0.12);color: #94a3b8; }
+
+  .cp-tb-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #cbd5e1;
+    padding: 0.35rem 0.75rem;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .cp-tb-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; transform: translateY(-1px); }
+  .cp-btn-graficos.active { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.5); color: #a78bfa; }
+
+  .cp-tb-icon {
+    width: 24px; height: 24px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; flex-shrink: 0;
+  }
+</style>
+
+<!-- ── SCRIPT DO MODAL ── -->
+<script>
+// ── Dados simulados ────────────────────────────
+const CP_DATA = [
+  { id:1001, vencto:'02/05/2026', vlconf:3450.00, vlpago:0,       saldo:3450.00, credor:'Fornec. Alpha Ltda',       ref:'NF-e 000142 / Compra materiais',    tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'28/04/2026', venctoRep:'',          ace:'N', sit:'Pendentes', origem:'NF-e'   },
+  { id:1002, vencto:'01/05/2026', vlconf:8200.00, vlpago:0,       saldo:8200.00, credor:'Beta Distribuidora S/A',   ref:'NF-e 000089 / Reposição estoque',   tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'27/04/2026', venctoRep:'',          ace:'N', sit:'Vencidos',  origem:'NF-e'   },
+  { id:1003, vencto:'05/05/2026', vlconf:750.00,  vlpago:0,       saldo:750.00,  credor:'Gama Serviços ME',         ref:'Fatura 001 / Manutenção',           tpdoc:'Fatura',  acresc:0,     desc:0,    dtcad:'29/04/2026', venctoRep:'',          ace:'S', sit:'Pendentes', origem:'Manual' },
+  { id:1004, vencto:'28/04/2026', vlconf:5120.00, vlpago:5120.00, saldo:0,       credor:'Delta Peças e Cia',        ref:'NF-e 000211 / Peças diversas',      tpdoc:'NF-e',    acresc:12.50, desc:0,    dtcad:'24/04/2026', venctoRep:'',          ace:'N', sit:'Pagos',     origem:'NF-e'   },
+  { id:1005, vencto:'10/05/2026', vlconf:12800.00,vlpago:0,       saldo:12800.00,credor:'Epsilon Transportes Ltda', ref:'CT-e 000033 / Frete mensal',        tpdoc:'CT-e',    acresc:0,     desc:100,  dtcad:'01/05/2026', venctoRep:'10/06/2026',ace:'N', sit:'Pendentes', origem:'Manual' },
+  { id:1006, vencto:'30/04/2026', vlconf:980.00,  vlpago:0,       saldo:980.00,  credor:'Zeta Limpeza ME',          ref:'Recibo 055 / Serviços limpeza',     tpdoc:'Recibo',  acresc:0,     desc:0,    dtcad:'25/04/2026', venctoRep:'',          ace:'N', sit:'Vencidos',  origem:'Manual' },
+  { id:1007, vencto:'15/05/2026', vlconf:2340.00, vlpago:0,       saldo:2340.00, credor:'Fornec. Alpha Ltda',       ref:'NF-e 000198 / Insumos',             tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'02/05/2026', venctoRep:'',          ace:'N', sit:'Pendentes', origem:'NF-e'   },
+  { id:1008, vencto:'20/04/2026', vlconf:1290.00, vlpago:1290.00, saldo:0,       credor:'Beta Distribuidora S/A',   ref:'NF-e 000071 / Produto X',           tpdoc:'NF-e',    acresc:0,     desc:50,   dtcad:'16/04/2026', venctoRep:'',          ace:'S', sit:'Pagos',     origem:'NF-e'   },
+  { id:1009, vencto:'25/05/2026', vlconf:6700.00, vlpago:0,       saldo:6700.00, credor:'Theta Logística Ltda',     ref:'NF-e 000302 / Estoque geral',       tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'03/05/2026', venctoRep:'25/06/2026',ace:'N', sit:'Pendentes', origem:'Compras'},
+  { id:1010, vencto:'18/04/2026', vlconf:480.00,  vlpago:0,       saldo:480.00,  credor:'Iota Seguros',             ref:'Apólice 7799 / Seguro veículos',    tpdoc:'Fatura',  acresc:0,     desc:0,    dtcad:'10/04/2026', venctoRep:'',          ace:'N', sit:'Cancelados', origem:'Manual' },
+  { id:1011, vencto:'08/05/2026', vlconf:14200.00,vlpago:0,       saldo:14200.00,credor:'Gama Serviços ME',         ref:'Fatura 002 / Contrato mensal',      tpdoc:'Fatura',  acresc:0,     desc:0,    dtcad:'04/05/2026', venctoRep:'08/06/2026',ace:'N', sit:'Pendentes', origem:'Manual' },
+  { id:1012, vencto:'22/04/2026', vlconf:3870.00, vlpago:3870.00, saldo:0,       credor:'Delta Peças e Cia',        ref:'NF-e 000188 / Peças motor',         tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'18/04/2026', venctoRep:'',          ace:'N', sit:'Pagos',     origem:'NF-e'   },
+];
+
+let cpData = [...CP_DATA];
+let cpFiltered = [...CP_DATA];
+let cpPage = 1;
+const CP_PER_PAGE = 15;
+let cpSelectedRows = new Set();
+let cpSortCol = '';
+let cpSortAsc = true;
+let cpGraficosAbertos = false;
+const cpCharts = {};
+
+function openContasPagarModal() {
+  const modal = document.getElementById('modal-contas-pagar');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  cpPage = 1;
+  cpSelectedRows.clear();
+  cpAplicarFiltros();
+}
+
+function closeContasPagarModal() {
+  document.getElementById('modal-contas-pagar').style.display = 'none';
+  document.body.style.overflow = '';
+  // destruir gráficos ao fechar
+  Object.values(cpCharts).forEach(c => c.destroy());
+  for (const k in cpCharts) delete cpCharts[k];
+  cpGraficosAbertos = false;
+  document.getElementById('cp-graficos-panel').style.display = 'none';
+  document.getElementById('cp-btn-graficos').classList.remove('active');
+}
+
+function cpAplicarFiltros() {
+  const credor   = (document.getElementById('cp-credor')?.value || '').toLowerCase().trim();
+  const sit      = document.getElementById('cp-situacao')?.value || 'Todas';
+  const origem   = document.getElementById('cp-origem')?.value   || 'Todas';
+  const desc     = (document.getElementById('cp-descricao')?.value || '').toLowerCase().trim();
+  const dtIni    = document.getElementById('cp-dt-ini')?.value || '';
+  const dtFim    = document.getElementById('cp-dt-fim')?.value || '';
+
+  cpFiltered = CP_DATA.filter(r => {
+    if (sit    !== 'Todas'  && r.sit    !== sit)    return false;
+    if (origem !== 'Todas'  && r.origem !== origem)  return false;
+    if (credor && !r.credor.toLowerCase().includes(credor)) return false;
+    if (desc   && !r.ref.toLowerCase().includes(desc))      return false;
+    if (dtIni) {
+      const [d,m,y] = r.vencto.split('/');
+      const rv = `${y}-${m}-${d}`;
+      if (rv < dtIni) return false;
+    }
+    if (dtFim) {
+      const [d,m,y] = r.vencto.split('/');
+      const rv = `${y}-${m}-${d}`;
+      if (rv > dtFim) return false;
+    }
+    return true;
+  });
+
+  const ativos = [credor,desc,sit!=='Todas'?sit:'',origem!=='Todas'?origem:'',dtIni,dtFim].filter(Boolean).length;
+  document.getElementById('cp-filtro-count').textContent = ativos;
+
+  cpPage = 1;
+  cpSelectedRows.clear();
+  cpRender();
+}
+
+function cpRender() {
+  const totalPages = Math.max(1, Math.ceil(cpFiltered.length / CP_PER_PAGE));
+  if (cpPage > totalPages) cpPage = totalPages;
+  const slice = cpFiltered.slice((cpPage-1)*CP_PER_PAGE, cpPage*CP_PER_PAGE);
+
+  document.getElementById('cp-pg-cur').textContent = cpPage;
+  document.getElementById('cp-pg-tot').textContent = totalPages;
+  document.getElementById('cp-total-count').textContent = cpFiltered.length;
+  document.getElementById('cp-qtde-total').textContent  = cpFiltered.length;
+
+  const totalSaldo = cpFiltered.reduce((s,r) => s + r.saldo, 0);
+  document.getElementById('cp-total-valor').textContent = 'R$ ' + totalSaldo.toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+  const fmt = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '-';
+  const sitClass = { 'Pendentes':'cp-pendente','Vencidos':'cp-vencido','Pagos':'cp-pago','Cancelados':'cp-cancelado' };
+  const sitBadge = { 'Pendentes':'cp-sit-pendente','Vencidos':'cp-sit-vencido','Pagos':'cp-sit-pago','Cancelados':'cp-sit-cancelado' };
+  const sitLabel = { 'Pendentes':'Pendente','Vencidos':'Vencido','Pagos':'Pago','Cancelados':'Cancelado' };
+
+  const tbody = document.getElementById('cp-tbody');
+  const empty = document.getElementById('cp-empty');
+
+  if (slice.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = slice.map(r => {
+    const rowCls = sitClass[r.sit] || '';
+    const sel    = cpSelectedRows.has(r.id) ? 'cp-selected' : '';
+    const bdgCls = sitBadge[r.sit] || '';
+    const bdgLbl = sitLabel[r.sit] || r.sit;
+    return `<tr class="${rowCls} ${sel}" onclick="cpToggleRow(${r.id}, this)">
+      <td onclick="event.stopPropagation()" style="text-align:center;">
+        <input type="checkbox" ${cpSelectedRows.has(r.id)?'checked':''} onchange="cpToggleRow(${r.id},this.closest('tr'))" style="cursor:pointer;accent-color:var(--primary);">
+      </td>
+      <td><strong>${r.vencto}</strong></td>
+      <td style="text-align:right;">${fmt(r.vlconf)}</td>
+      <td style="text-align:right;color:${r.vlpago>0?'#10b981':'var(--text-muted)'};">${fmt(r.vlpago)}</td>
+      <td style="text-align:right;font-weight:700;color:${r.saldo>0?'#ef4444':'#10b981'};">${fmt(r.saldo)}</td>
+      <td title="${r.credor}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${r.credor}</td>
+      <td title="${r.ref}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary);">${r.ref}</td>
+      <td><span style="background:var(--bg-tertiary);padding:1px 7px;border-radius:4px;font-size:0.68rem;font-weight:600;color:var(--text-secondary);">${r.tpdoc}</span></td>
+      <td style="text-align:right;color:${r.acresc>0?'#f97316':'var(--text-muted)'};">${r.acresc>0?'R$ '+r.acresc.toLocaleString('pt-BR',{minimumFractionDigits:2}):'-'}</td>
+      <td style="text-align:right;color:${r.desc>0?'#10b981':'var(--text-muted)'};">${r.desc>0?'R$ '+r.desc.toLocaleString('pt-BR',{minimumFractionDigits:2}):'-'}</td>
+      <td style="color:var(--text-secondary);">${r.dtcad}</td>
+      <td style="color:var(--text-secondary);">${r.venctoRep||'-'}</td>
+      <td style="text-align:center;"><span class="cp-sit-badge ${bdgCls}">${bdgLbl}</span></td>
+      <td style="color:var(--text-muted);font-size:0.7rem;">${r.id}</td>
+    </tr>`;
+  }).join('');
+}
+
+function cpToggleRow(id, tr) {
+  if (cpSelectedRows.has(id)) cpSelectedRows.delete(id);
+  else cpSelectedRows.add(id);
+  tr.classList.toggle('cp-selected', cpSelectedRows.has(id));
+  const cb = tr.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = cpSelectedRows.has(id);
+}
+
+function cpToggleAll(chk) {
+  document.querySelectorAll('#cp-tbody tr').forEach(tr => {
+    const cb = tr.querySelector('input[type=checkbox]');
+    if (!cb) return;
+    const id = parseInt(tr.cells[tr.cells.length-1]?.textContent);
+    const row = CP_DATA.find(r => r.id === id);
+    if (!row) return;
+    if (chk.checked) { cpSelectedRows.add(id); tr.classList.add('cp-selected'); cb.checked = true; }
+    else             { cpSelectedRows.delete(id); tr.classList.remove('cp-selected'); cb.checked = false; }
+  });
+}
+
+function cpAlterar() {
+  if (cpSelectedRows.size === 0) { showToast('Selecione um título para alterar'); return; }
+  if (cpSelectedRows.size > 1)   { showToast('Selecione apenas um título para alterar'); return; }
+  showToast('Alterar título #' + [...cpSelectedRows][0]);
+}
+function cpExcluir() {
+  if (cpSelectedRows.size === 0) { showToast('Selecione ao menos um título para excluir'); return; }
+  showToast('Excluir ' + cpSelectedRows.size + ' título(s) selecionado(s)');
+}
+
+function cpPgFirst() { cpPage = 1; cpRender(); }
+function cpPgPrev()  { if (cpPage > 1) { cpPage--; cpRender(); } }
+function cpPgNext()  { const tot = Math.ceil(cpFiltered.length/CP_PER_PAGE); if (cpPage < tot) { cpPage++; cpRender(); } }
+function cpPgLast()  { cpPage = Math.ceil(cpFiltered.length/CP_PER_PAGE)||1; cpRender(); }
+
+function cpSort(col) {
+  if (cpSortCol === col) cpSortAsc = !cpSortAsc;
+  else { cpSortCol = col; cpSortAsc = true; }
+  const map = { vencto:'vencto', vlconf:'vlconf', vlpago:'vlpago', saldo:'saldo', credor:'credor' };
+  const key = map[col];
+  if (!key) return;
+  cpFiltered.sort((a,b) => {
+    let va = a[key], vb = b[key];
+    if (key === 'vencto') {
+      const toDate = s => { const [d,m,y] = s.split('/'); return new Date(y,m-1,d); };
+      va = toDate(va); vb = toDate(vb);
+    }
+    return cpSortAsc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+  });
+  cpPage = 1; cpRender();
+}
+
+function cpToggleOpcoes() {
+  const menu = document.getElementById('cp-opcoes-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if (menu.style.display === 'block') {
+    const close = (e) => { if (!menu.contains(e.target) && e.target.id !== 'cp-opcoes-btn') { menu.style.display = 'none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 10);
+  }
+}
+
+function cpToggleGraficos() {
+  cpGraficosAbertos = !cpGraficosAbertos;
+  const panel = document.getElementById('cp-graficos-panel');
+  const btn   = document.getElementById('cp-btn-graficos');
+  panel.style.display = cpGraficosAbertos ? 'block' : 'none';
+  btn.classList.toggle('active', cpGraficosAbertos);
+  if (cpGraficosAbertos) setTimeout(cpRenderGraficos, 60);
+}
+
+function cpRenderGraficos() {
+  const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+  const grid   = () => isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const lbl    = () => isDark() ? '#94a3b8' : '#64748b';
+
+  const mkChart = (id, cfg) => {
+    if (cpCharts[id]) cpCharts[id].destroy();
+    const ctx = document.getElementById(id)?.getContext('2d');
+    if (!ctx) return;
+    cpCharts[id] = new Chart(ctx, cfg);
+  };
+
+  mkChart('cp-chart-semanas', {
+    type: 'bar',
+    data: {
+      labels: ['Sem 1','Sem 2','Sem 3','Sem 4'],
+      datasets: [{ label:'A Pagar', data:[12400,18700,9800,21300], backgroundColor:'rgba(239,68,68,0.7)', borderRadius:4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}}, y:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}} } }
+  });
+
+  mkChart('cp-chart-fornecedores', {
+    type: 'doughnut',
+    data: {
+      labels: ['Alpha','Beta Ltda','Gama S/A','Delta ME','Outros'],
+      datasets: [{ data:[23400,18200,14700,9300,18720], backgroundColor:['#ef4444','#f97316','#f59e0b','#3b82f6','#6366f1'], borderWidth:0 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ color:lbl(), font:{size:10}, boxWidth:10 } } } }
+  });
+
+  mkChart('cp-chart-fluxo', {
+    type: 'line',
+    data: {
+      labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+      datasets: [
+        { label:'Pago',    data:[42000,38500,51200,47800,52100,49300], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', tension:0.4, fill:true, borderWidth:2 },
+        { label:'Previsto',data:[45000,40000,48000,50000,55000,52000], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.05)', tension:0.4, fill:false, borderWidth:2, borderDash:[4,4] }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:lbl(), font:{size:10}, boxWidth:12 } } },
+      scales:{ x:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}}, y:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}} } }
+  });
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL FULL-PAGE — CONTAS A RECEBER
+     ══════════════════════════════════════════════════════════ -->
+<div id="modal-contas-receber" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg-primary);flex-direction:column;font-family:'Inter',sans-serif;">
+
+  <!-- ── HEADER ── -->
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#064e3b 100%);color:#fff;padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div style="width:32px;height:32px;background:rgba(16,185,129,0.25);border:1px solid rgba(16,185,129,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-arrow-down" style="color:#6ee7b7;font-size:0.875rem;"></i>
+      </div>
+      <span style="font-size:1.0625rem;font-weight:700;letter-spacing:-0.01em;">Contas a Receber</span>
+    </div>
+    <button onclick="closeContasReceberModal()" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;padding:0.35rem 0.875rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.4rem;transition:all 0.15s;" onmouseover="this.style.background='rgba(16,185,129,0.3)'" onmouseout="this.style.background='rgba(16,185,129,0.15)'">
+      <i class="fas fa-power-off"></i> Sair
+    </button>
+  </div>
+
+  <!-- ── FILTROS ── -->
+  <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0.875rem 1.5rem;flex-shrink:0;">
+    <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">
+      <i class="fas fa-filter"></i> Filtro (<span id="cr-filtro-count">0</span>)
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;">
+      <!-- Cliente -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:180px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Cliente/Devedor</label>
+        <div style="display:flex;gap:0.35rem;">
+          <button onclick="showToast('Buscar Cliente')" style="background:var(--success);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='var(--success)'">
+            <i class="fas fa-search" style="font-size:0.75rem;"></i>
+          </button>
+          <input id="cr-cliente" type="text" placeholder="Todos" style="flex:1;padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);min-width:0;" oninput="crAplicarFiltros()">
+        </div>
+      </div>
+      <!-- Período -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Período de Vencimento</label>
+        <div style="display:flex;align-items:center;gap:0.35rem;">
+          <input id="cr-dt-ini" type="date" value="2026-05-01" style="padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;background:var(--input-bg);color:var(--text-primary);" oninput="crAplicarFiltros()">
+          <span style="font-size:0.75rem;color:var(--text-muted);">até</span>
+          <input id="cr-dt-fim" type="date" value="2026-05-31" style="padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;background:var(--input-bg);color:var(--text-primary);" oninput="crAplicarFiltros()">
+        </div>
+      </div>
+      <!-- Situação -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:145px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Situação</label>
+        <select id="cr-situacao" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" onchange="crAplicarFiltros()">
+          <option value="Todas">Todas</option>
+          <option value="Pendentes" selected>Pendentes</option>
+          <option value="Recebidos">Recebidos</option>
+          <option value="Vencidos">Vencidos</option>
+          <option value="Cancelados">Cancelados</option>
+        </select>
+      </div>
+      <!-- Origem -->
+      <div style="display:flex;flex-direction:column;gap:0.3rem;min-width:145px;">
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Origem</label>
+        <select id="cr-origem" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" onchange="crAplicarFiltros()">
+          <option value="Todas">Todas</option>
+          <option value="Manual">Manual</option>
+          <option value="NF-e">NF-e</option>
+          <option value="Vendas">Vendas</option>
+          <option value="Boleto">Boleto</option>
+        </select>
+      </div>
+    </div>
+    <!-- Descrição -->
+    <div style="margin-top:0.65rem;display:flex;flex-direction:column;gap:0.3rem;max-width:360px;">
+      <label style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">Descrição/Docto (parcial)</label>
+      <input id="cr-descricao" type="text" placeholder="" style="padding:0.4rem 0.65rem;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;background:var(--input-bg);color:var(--text-primary);" oninput="crAplicarFiltros()">
+    </div>
+  </div>
+
+  <!-- ── TOOLBAR ── -->
+  <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:0.5rem 1.25rem;display:flex;align-items:center;gap:0.25rem;flex-shrink:0;border-bottom:2px solid #10b981;">
+    <button class="cr-tb-btn" onclick="showToast('Incluir título a receber')">
+      <div class="cr-tb-icon" style="background:rgba(16,185,129,0.2);color:#10b981;"><i class="fas fa-plus"></i></div>
+      <span>Incluir</span>
+    </button>
+    <button class="cr-tb-btn" onclick="crAlterar()">
+      <div class="cr-tb-icon" style="background:rgba(14,165,233,0.2);color:#38bdf8;"><i class="fas fa-edit"></i></div>
+      <span>Alterar</span>
+    </button>
+    <button class="cr-tb-btn" onclick="crExcluir()">
+      <div class="cr-tb-icon" style="background:rgba(239,68,68,0.2);color:#f87171;"><i class="fas fa-trash-alt"></i></div>
+      <span>Excluir</span>
+    </button>
+    <div style="width:1px;height:36px;background:rgba(255,255,255,0.1);margin:0 0.25rem;"></div>
+    <button class="cr-tb-btn" onclick="showToast('Imprimir relatório')">
+      <div class="cr-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-print"></i></div>
+      <span>Imprimir</span>
+    </button>
+    <button class="cr-tb-btn" onclick="showToast('Baixar documento')">
+      <div class="cr-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-download"></i></div>
+      <span>Baixar documento</span>
+    </button>
+    <div style="position:relative;display:inline-block;">
+      <button class="cr-tb-btn" onclick="crToggleOpcoes()" id="cr-opcoes-btn">
+        <div class="cr-tb-icon" style="background:rgba(148,163,184,0.15);color:#94a3b8;"><i class="fas fa-ellipsis-h"></i></div>
+        <span>Opções <i class="fas fa-chevron-down" style="font-size:0.55rem;margin-left:2px;"></i></span>
+      </button>
+      <div id="cr-opcoes-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:100;min-width:190px;overflow:hidden;">
+        <button onclick="showToast('Baixa em lote');crToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-check-double" style="color:#10b981;width:14px;"></i> Baixa em Lote</button>
+        <button onclick="showToast('Acordo/Renegociação');crToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-handshake" style="color:var(--warning);width:14px;"></i> Acordo/Renegociação</button>
+        <button onclick="showToast('Exportar Excel');crToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-file-excel" style="color:#10b981;width:14px;"></i> Exportar Excel</button>
+        <button onclick="showToast('Emitir Boleto');crToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;font-size:0.8rem;color:var(--text-primary);display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-barcode" style="color:var(--primary);width:14px;"></i> Emitir Boleto</button>
+        <button onclick="showToast('Cancelar título');crToggleOpcoes()" style="width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;cursor:pointer;font-size:0.8rem;color:#ef4444;display:flex;align-items:center;gap:0.6rem;transition:background 0.12s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='none'"><i class="fas fa-ban" style="width:14px;"></i> Cancelar Título</button>
+      </div>
+    </div>
+    <div style="flex:1;"></div>
+    <!-- Botão Gráficos -->
+    <button class="cr-tb-btn cr-btn-graficos" onclick="crToggleGraficos()" id="cr-btn-graficos">
+      <div class="cr-tb-icon" style="background:rgba(139,92,246,0.2);color:#a78bfa;"><i class="fas fa-chart-bar"></i></div>
+      <span>Gráficos</span>
+    </button>
+    <!-- Totalizador -->
+    <div style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:0.35rem 1rem;text-align:right;margin-left:0.5rem;min-width:120px;">
+      <div style="font-size:0.65rem;font-weight:700;color:#6ee7b7;text-transform:uppercase;letter-spacing:0.05em;">RECEBER (<span id="cr-total-count">0</span>)</div>
+      <div style="font-size:1rem;font-weight:800;color:#fff;" id="cr-total-valor">R$ 0,00</div>
+    </div>
+  </div>
+
+  <!-- ── CORPO SCROLLÁVEL ── -->
+  <div id="cr-scroll-body" style="flex:1;overflow-y:auto;overflow-x:auto;">
+
+    <!-- ── PAINEL DE GRÁFICOS (colapsável) ── -->
+    <div id="cr-graficos-panel" style="display:none;background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:1rem 1.5rem;flex-shrink:0;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:1rem;">
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Previsto vs Realizado (6 meses)</div>
+          <div style="position:relative;height:130px;"><canvas id="cr-chart-prevreal"></canvas></div>
+        </div>
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Status da Carteira</div>
+          <div style="position:relative;height:130px;"><canvas id="cr-chart-status"></canvas></div>
+        </div>
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+          <div style="font-size:0.68rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem;">Curva de Inadimplência — Últimos 6 Meses</div>
+          <div style="position:relative;height:130px;"><canvas id="cr-chart-inadim"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABELA ── -->
+    <div style="position:relative;">
+      <table id="cr-table" style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:1100px;">
+        <thead>
+          <tr style="background:linear-gradient(135deg,#1e293b,#0f172a);color:#94a3b8;position:sticky;top:0;z-index:10;">
+            <th style="width:32px;padding:0.6rem 0.75rem;border-bottom:2px solid #10b981;text-align:center;"><input type="checkbox" id="cr-chk-all" onchange="crToggleAll(this)" style="cursor:pointer;accent-color:#10b981;"></th>
+            <th class="cr-th" onclick="crSort('vencto')" title="Ordenar por Vencto">Vencto <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+            <th class="cr-th" onclick="crSort('vlconf')">VL.Conf. <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+            <th class="cr-th" onclick="crSort('vlrecebido')">VL.Recebido <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+            <th class="cr-th" onclick="crSort('saldo')">Saldo <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+            <th class="cr-th" onclick="crSort('cliente')" style="min-width:180px;">Cliente/Devedor <i class="fas fa-sort" style="font-size:0.6rem;opacity:0.5;"></i></th>
+            <th class="cr-th" style="min-width:160px;">Referência / Histórico</th>
+            <th class="cr-th">Tp.Doc</th>
+            <th class="cr-th">Acrésc.Rec.</th>
+            <th class="cr-th">Descontado</th>
+            <th class="cr-th">Dt.Cad.</th>
+            <th class="cr-th">Vencto Rep.</th>
+            <th class="cr-th">Ace</th>
+            <th class="cr-th">ID</th>
+          </tr>
+        </thead>
+        <tbody id="cr-tbody"></tbody>
+      </table>
+      <div id="cr-empty" style="display:none;text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+        <i class="fas fa-inbox" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:1rem;"></i>
+        <div style="font-size:0.875rem;font-weight:600;">Nenhum título encontrado</div>
+        <div style="font-size:0.78rem;margin-top:0.25rem;">Ajuste os filtros e tente novamente</div>
+      </div>
+    </div>
+
+  </div><!-- /cr-scroll-body -->
+
+  <!-- ── STATUS BAR / PAGINAÇÃO ── -->
+  <div style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:0.35rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;flex-wrap:wrap;position:sticky;bottom:0;z-index:20;">
+    <div style="display:flex;align-items:center;gap:0.875rem;flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#f97316;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Pendente</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#ef4444;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Vencido</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#10b981;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Recebido</span></span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;"><span style="width:9px;height:9px;background:#94a3b8;border-radius:3px;display:inline-block;"></span><span style="color:var(--text-secondary);">Cancelado</span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.4rem;">
+      <span style="font-size:0.72rem;color:var(--text-secondary);margin-right:0.25rem;">Página</span>
+      <button onclick="crPgFirst()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-double-left"></i></button>
+      <button onclick="crPgPrev()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-left"></i></button>
+      <span style="font-size:0.72rem;color:var(--text-secondary);padding:0 0.4rem;white-space:nowrap;"><span id="cr-pg-cur">1</span> de <span id="cr-pg-tot">1</span></span>
+      <button onclick="crPgNext()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-right"></i></button>
+      <button onclick="crPgLast()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'"><i class="fas fa-angle-double-right"></i></button>
+      <button onclick="crRender()" style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:0.65rem;transition:all 0.15s;margin-left:2px;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'" title="Recarregar"><i class="fas fa-sync-alt"></i></button>
+      <span style="font-size:0.72rem;color:var(--text-secondary);margin-left:0.5rem;white-space:nowrap;">Total: <strong style="color:var(--text-primary);" id="cr-qtde-total">0</strong> títulos</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ESTILOS DO MODAL RECEBER ── -->
+<style>
+  #modal-contas-receber { animation: crFadeIn 0.2s ease; }
+  @keyframes crFadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .cr-th {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #10b981;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    transition: color 0.15s;
+  }
+  .cr-th:hover { color: #fff; }
+
+  #cr-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+    cursor: pointer;
+  }
+  #cr-table tbody tr:hover { background: var(--table-row-hover); }
+  #cr-table tbody tr.cr-selected { background: rgba(16,185,129,0.08); }
+  #cr-table tbody td {
+    padding: 0.5rem 0.75rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    border-right: 1px solid var(--border-light);
+  }
+  #cr-table tbody tr.cr-vencido   td:first-child { border-left: 3px solid #ef4444; }
+  #cr-table tbody tr.cr-pendente  td:first-child { border-left: 3px solid #f97316; }
+  #cr-table tbody tr.cr-recebido  td:first-child { border-left: 3px solid #10b981; }
+  #cr-table tbody tr.cr-cancelado td:first-child { border-left: 3px solid #94a3b8; }
+
+  .cr-sit-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 9999px;
+    font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .cr-sit-pendente  { background: rgba(249,115,22,0.12); color: #f97316; }
+  .cr-sit-vencido   { background: rgba(239,68,68,0.12);  color: #ef4444; }
+  .cr-sit-recebido  { background: rgba(16,185,129,0.12); color: #10b981; }
+  .cr-sit-cancelado { background: rgba(148,163,184,0.12);color: #94a3b8; }
+
+  .cr-tb-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #cbd5e1;
+    padding: 0.35rem 0.75rem;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .cr-tb-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; transform: translateY(-1px); }
+  .cr-btn-graficos.active { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.5); color: #a78bfa; }
+
+  .cr-tb-icon {
+    width: 24px; height: 24px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; flex-shrink: 0;
+  }
+</style>
+
+<!-- ── SCRIPT DO MODAL RECEBER ── -->
+<script>
+const CR_DATA = [
+  { id:2001, vencto:'03/05/2026', vlconf:5800.00,  vlrecebido:0,       saldo:5800.00,  cliente:'Auto Peças Brilho Ltda',      ref:'NF-e 000142 / Venda peças',         tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'29/04/2026', venctoRep:'',          ace:'N', sit:'Pendentes', origem:'NF-e'   },
+  { id:2002, vencto:'28/04/2026', vlconf:12400.00, vlrecebido:0,       saldo:12400.00, cliente:'Distribuidora Norte S/A',      ref:'NF-e 000089 / Produtos diversos',   tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'24/04/2026', venctoRep:'',          ace:'N', sit:'Vencidos',  origem:'NF-e'   },
+  { id:2003, vencto:'10/05/2026', vlconf:980.00,   vlrecebido:0,       saldo:980.00,   cliente:'João da Silva',                ref:'OS 001 / Serviço revisão',          tpdoc:'NF-Se',   acresc:0,     desc:0,    dtcad:'01/05/2026', venctoRep:'',          ace:'S', sit:'Pendentes', origem:'Vendas' },
+  { id:2004, vencto:'25/04/2026', vlconf:3200.00,  vlrecebido:3200.00, saldo:0,        cliente:'Mecânica Veloz ME',            ref:'NF-e 000211 / Peças e serviços',    tpdoc:'NF-e',    acresc:15.00, desc:0,    dtcad:'21/04/2026', venctoRep:'',          ace:'N', sit:'Recebidos', origem:'NF-e'   },
+  { id:2005, vencto:'15/05/2026', vlconf:22300.00, vlrecebido:0,       saldo:22300.00, cliente:'Transportes Ágil Ltda',        ref:'NF-e 000033 / Fornecimento mensal', tpdoc:'NF-e',    acresc:0,     desc:200,  dtcad:'02/05/2026', venctoRep:'15/06/2026',ace:'N', sit:'Pendentes', origem:'Vendas' },
+  { id:2006, vencto:'20/04/2026', vlconf:750.00,   vlrecebido:0,       saldo:750.00,   cliente:'Cláudia Ferreira',             ref:'OS 002 / Troca óleo',               tpdoc:'NF-Se',   acresc:0,     desc:0,    dtcad:'17/04/2026', venctoRep:'',          ace:'N', sit:'Vencidos',  origem:'Vendas' },
+  { id:2007, vencto:'18/05/2026', vlconf:8700.00,  vlrecebido:0,       saldo:8700.00,  cliente:'Peças & Cia Comércio',         ref:'NF-e 000198 / Reposição',           tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'03/05/2026', venctoRep:'',          ace:'N', sit:'Pendentes', origem:'NF-e'   },
+  { id:2008, vencto:'15/04/2026', vlconf:1650.00,  vlrecebido:1650.00, saldo:0,        cliente:'Pedro Henrique Alves',         ref:'OS 003 / Manutenção preventiva',    tpdoc:'NF-Se',   acresc:0,     desc:50,   dtcad:'11/04/2026', venctoRep:'',          ace:'S', sit:'Recebidos', origem:'Vendas' },
+  { id:2009, vencto:'22/05/2026', vlconf:34500.00, vlrecebido:0,       saldo:34500.00, cliente:'Moto Parts Express',           ref:'NF-e 000302 / Estoque geral',       tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'04/05/2026', venctoRep:'22/06/2026',ace:'N', sit:'Pendentes', origem:'NF-e'   },
+  { id:2010, vencto:'10/04/2026', vlconf:480.00,   vlrecebido:0,       saldo:480.00,   cliente:'Fernanda Costa Ribeiro',       ref:'OS 004 / Diagnóstico eletrônico',   tpdoc:'NF-Se',   acresc:0,     desc:0,    dtcad:'07/04/2026', venctoRep:'',          ace:'N', sit:'Cancelados', origem:'Vendas' },
+  { id:2011, vencto:'25/05/2026', vlconf:67400.00, vlrecebido:0,       saldo:67400.00, cliente:'Auto Center Estrela Ltda',     ref:'NF-e 000415 / Contrato trimestral', tpdoc:'NF-e',    acresc:0,     desc:0,    dtcad:'05/05/2026', venctoRep:'25/06/2026',ace:'N', sit:'Pendentes', origem:'Boleto' },
+  { id:2012, vencto:'18/04/2026', vlconf:2900.00,  vlrecebido:2900.00, saldo:0,        cliente:'Luiz Eduardo Moraes',          ref:'OS 005 / Troca suspensão',          tpdoc:'NF-Se',   acresc:0,     desc:0,    dtcad:'14/04/2026', venctoRep:'',          ace:'N', sit:'Recebidos', origem:'Vendas' },
+];
+
+let crFiltered = [...CR_DATA];
+let crPage = 1;
+const CR_PER_PAGE = 15;
+let crSelectedRows = new Set();
+let crSortCol = '';
+let crSortAsc = true;
+let crGraficosAbertos = false;
+const crCharts = {};
+
+function openContasReceberModal() {
+  const modal = document.getElementById('modal-contas-receber');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  crPage = 1;
+  crSelectedRows.clear();
+  crAplicarFiltros();
+}
+
+function closeContasReceberModal() {
+  document.getElementById('modal-contas-receber').style.display = 'none';
+  document.body.style.overflow = '';
+  Object.values(crCharts).forEach(c => c.destroy());
+  for (const k in crCharts) delete crCharts[k];
+  crGraficosAbertos = false;
+  document.getElementById('cr-graficos-panel').style.display = 'none';
+  document.getElementById('cr-btn-graficos').classList.remove('active');
+}
+
+function crAplicarFiltros() {
+  const cliente = (document.getElementById('cr-cliente')?.value || '').toLowerCase().trim();
+  const sit     = document.getElementById('cr-situacao')?.value || 'Todas';
+  const origem  = document.getElementById('cr-origem')?.value   || 'Todas';
+  const desc    = (document.getElementById('cr-descricao')?.value || '').toLowerCase().trim();
+  const dtIni   = document.getElementById('cr-dt-ini')?.value || '';
+  const dtFim   = document.getElementById('cr-dt-fim')?.value || '';
+
+  crFiltered = CR_DATA.filter(r => {
+    if (sit    !== 'Todas' && r.sit    !== sit)    return false;
+    if (origem !== 'Todas' && r.origem !== origem)  return false;
+    if (cliente && !r.cliente.toLowerCase().includes(cliente)) return false;
+    if (desc    && !r.ref.toLowerCase().includes(desc))        return false;
+    if (dtIni) { const [d,m,y] = r.vencto.split('/'); if (`${y}-${m}-${d}` < dtIni) return false; }
+    if (dtFim) { const [d,m,y] = r.vencto.split('/'); if (`${y}-${m}-${d}` > dtFim) return false; }
+    return true;
+  });
+
+  const ativos = [cliente,desc,sit!=='Todas'?sit:'',origem!=='Todas'?origem:'',dtIni,dtFim].filter(Boolean).length;
+  document.getElementById('cr-filtro-count').textContent = ativos;
+
+  crPage = 1;
+  crSelectedRows.clear();
+  crRender();
+}
+
+function crRender() {
+  const totalPages = Math.max(1, Math.ceil(crFiltered.length / CR_PER_PAGE));
+  if (crPage > totalPages) crPage = totalPages;
+  const slice = crFiltered.slice((crPage-1)*CR_PER_PAGE, crPage*CR_PER_PAGE);
+
+  document.getElementById('cr-pg-cur').textContent  = crPage;
+  document.getElementById('cr-pg-tot').textContent  = totalPages;
+  document.getElementById('cr-total-count').textContent = crFiltered.length;
+  document.getElementById('cr-qtde-total').textContent  = crFiltered.length;
+
+  const totalSaldo = crFiltered.reduce((s,r) => s + r.saldo, 0);
+  document.getElementById('cr-total-valor').textContent = 'R$ ' + totalSaldo.toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+  const fmt = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '-';
+  const sitRowCls = { 'Pendentes':'cr-pendente','Vencidos':'cr-vencido','Recebidos':'cr-recebido','Cancelados':'cr-cancelado' };
+  const sitBdgCls = { 'Pendentes':'cr-sit-pendente','Vencidos':'cr-sit-vencido','Recebidos':'cr-sit-recebido','Cancelados':'cr-sit-cancelado' };
+  const sitLabel  = { 'Pendentes':'Pendente','Vencidos':'Vencido','Recebidos':'Recebido','Cancelados':'Cancelado' };
+
+  const tbody = document.getElementById('cr-tbody');
+  const empty = document.getElementById('cr-empty');
+
+  if (slice.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = slice.map(r => {
+    const rowCls = sitRowCls[r.sit] || '';
+    const sel    = crSelectedRows.has(r.id) ? 'cr-selected' : '';
+    const bdgCls = sitBdgCls[r.sit] || '';
+    const bdgLbl = sitLabel[r.sit] || r.sit;
+    return `<tr class="${rowCls} ${sel}" onclick="crToggleRow(${r.id}, this)">
+      <td onclick="event.stopPropagation()" style="text-align:center;">
+        <input type="checkbox" ${crSelectedRows.has(r.id)?'checked':''} onchange="crToggleRow(${r.id},this.closest('tr'))" style="cursor:pointer;accent-color:#10b981;">
+      </td>
+      <td><strong>${r.vencto}</strong></td>
+      <td style="text-align:right;">${fmt(r.vlconf)}</td>
+      <td style="text-align:right;color:${r.vlrecebido>0?'#10b981':'var(--text-muted)'};">${fmt(r.vlrecebido)}</td>
+      <td style="text-align:right;font-weight:700;color:${r.saldo>0?'#f97316':'#10b981'};">${fmt(r.saldo)}</td>
+      <td title="${r.cliente}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${r.cliente}</td>
+      <td title="${r.ref}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary);">${r.ref}</td>
+      <td><span style="background:var(--bg-tertiary);padding:1px 7px;border-radius:4px;font-size:0.68rem;font-weight:600;color:var(--text-secondary);">${r.tpdoc}</span></td>
+      <td style="text-align:right;color:${r.acresc>0?'#f97316':'var(--text-muted)'};">${r.acresc>0?'R$ '+r.acresc.toLocaleString('pt-BR',{minimumFractionDigits:2}):'-'}</td>
+      <td style="text-align:right;color:${r.desc>0?'#10b981':'var(--text-muted)'};">${r.desc>0?'R$ '+r.desc.toLocaleString('pt-BR',{minimumFractionDigits:2}):'-'}</td>
+      <td style="color:var(--text-secondary);">${r.dtcad}</td>
+      <td style="color:var(--text-secondary);">${r.venctoRep||'-'}</td>
+      <td style="text-align:center;"><span class="cr-sit-badge ${bdgCls}">${bdgLbl}</span></td>
+      <td style="color:var(--text-muted);font-size:0.7rem;">${r.id}</td>
+    </tr>`;
+  }).join('');
+}
+
+function crToggleRow(id, tr) {
+  if (crSelectedRows.has(id)) crSelectedRows.delete(id);
+  else crSelectedRows.add(id);
+  tr.classList.toggle('cr-selected', crSelectedRows.has(id));
+  const cb = tr.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = crSelectedRows.has(id);
+}
+
+function crToggleAll(chk) {
+  document.querySelectorAll('#cr-tbody tr').forEach(tr => {
+    const cb = tr.querySelector('input[type=checkbox]');
+    if (!cb) return;
+    const id = parseInt(tr.cells[tr.cells.length-1]?.textContent);
+    if (isNaN(id)) return;
+    if (chk.checked) { crSelectedRows.add(id); tr.classList.add('cr-selected'); cb.checked = true; }
+    else             { crSelectedRows.delete(id); tr.classList.remove('cr-selected'); cb.checked = false; }
+  });
+}
+
+function crAlterar() {
+  if (crSelectedRows.size === 0) { showToast('Selecione um título para alterar'); return; }
+  if (crSelectedRows.size > 1)   { showToast('Selecione apenas um título para alterar'); return; }
+  showToast('Alterar título #' + [...crSelectedRows][0]);
+}
+function crExcluir() {
+  if (crSelectedRows.size === 0) { showToast('Selecione ao menos um título para excluir'); return; }
+  showToast('Excluir ' + crSelectedRows.size + ' título(s) selecionado(s)');
+}
+
+function crPgFirst() { crPage = 1; crRender(); }
+function crPgPrev()  { if (crPage > 1) { crPage--; crRender(); } }
+function crPgNext()  { const tot = Math.ceil(crFiltered.length/CR_PER_PAGE); if (crPage < tot) { crPage++; crRender(); } }
+function crPgLast()  { crPage = Math.ceil(crFiltered.length/CR_PER_PAGE)||1; crRender(); }
+
+function crSort(col) {
+  if (crSortCol === col) crSortAsc = !crSortAsc;
+  else { crSortCol = col; crSortAsc = true; }
+  const key = col;
+  crFiltered.sort((a,b) => {
+    let va = a[key], vb = b[key];
+    if (key === 'vencto') {
+      const toDate = s => { const [d,m,y] = s.split('/'); return new Date(y,m-1,d); };
+      va = toDate(va); vb = toDate(vb);
+    }
+    return crSortAsc ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+  });
+  crPage = 1; crRender();
+}
+
+function crToggleOpcoes() {
+  const menu = document.getElementById('cr-opcoes-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if (menu.style.display === 'block') {
+    const close = (e) => { if (!menu.contains(e.target) && e.target.id !== 'cr-opcoes-btn') { menu.style.display = 'none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 10);
+  }
+}
+
+function crToggleGraficos() {
+  crGraficosAbertos = !crGraficosAbertos;
+  const panel = document.getElementById('cr-graficos-panel');
+  const btn   = document.getElementById('cr-btn-graficos');
+  panel.style.display = crGraficosAbertos ? 'block' : 'none';
+  btn.classList.toggle('active', crGraficosAbertos);
+  if (crGraficosAbertos) setTimeout(crRenderGraficos, 60);
+}
+
+function crRenderGraficos() {
+  const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+  const grid   = () => isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const lbl    = () => isDark() ? '#94a3b8' : '#64748b';
+
+  const mkChart = (id, cfg) => {
+    if (crCharts[id]) crCharts[id].destroy();
+    const ctx = document.getElementById(id)?.getContext('2d');
+    if (!ctx) return;
+    crCharts[id] = new Chart(ctx, cfg);
+  };
+
+  mkChart('cr-chart-prevreal', {
+    type: 'bar',
+    data: {
+      labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+      datasets: [
+        { label:'Previsto',  data:[55000,61000,58000,63000,67000,70000], backgroundColor:'rgba(14,165,233,0.5)',  borderRadius:3 },
+        { label:'Realizado', data:[52000,58500,54000,61000,67400,64000], backgroundColor:'rgba(16,185,129,0.7)', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:lbl(), font:{size:10}, boxWidth:10 } } },
+      scales:{ x:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}}, y:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}} } }
+  });
+
+  mkChart('cr-chart-status', {
+    type: 'doughnut',
+    data: {
+      labels: ['Pendente','Vencido','Recebido','Cancelado'],
+      datasets: [{ data:[138750,22300,67400,480], backgroundColor:['#f97316','#ef4444','#10b981','#94a3b8'], borderWidth:0 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ color:lbl(), font:{size:10}, boxWidth:10 } } } }
+  });
+
+  mkChart('cr-chart-inadim', {
+    type: 'line',
+    data: {
+      labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+      datasets: [
+        { label:'Inadimplência (R$)', data:[18000,21000,19500,24000,22300,25800], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', tension:0.4, fill:true, borderWidth:2 },
+        { label:'Meta',               data:[15000,15000,15000,15000,15000,15000], borderColor:'#94a3b8', backgroundColor:'transparent',          tension:0,   fill:false, borderWidth:1.5, borderDash:[5,5] }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:lbl(), font:{size:10}, boxWidth:12 } } },
+      scales:{ x:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}}, y:{ticks:{color:lbl(),font:{size:10}},grid:{color:grid()}} } }
+  });
+}
 </script>
 </body>
 </html>
